@@ -22,14 +22,11 @@ The uc-video solution, powered by Video.js, offers a seamless and high-performan
 
 ### From NPM
 1. Install the package: `npm install @uploadcare/uc-video`
-
 2. Connect component from your script file
-
 ```js
 import '@uploadcare/uc-video';
 import '@uploadcare/uc-video/style'
 ```
-
 3. Add component in your application markup:
 ```html
 <uc-video src="URL_FROM_UPLOADCARE"></uc-video>

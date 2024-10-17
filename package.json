@@ -1,7 +1,7 @@
 {
   "name": "@uploadcare/uc-video",
   "private": false,
-  "version": "0.0.0-alpha.3",
+  "version": "0.0.0-alpha.4",
   "files": ["dist"],
   "type": "module",
   "main": "./dist/uc-video.umd.cjs",

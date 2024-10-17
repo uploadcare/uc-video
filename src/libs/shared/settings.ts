@@ -1,5 +1,3 @@
-import videojs from "video.js";
-
 export const DEFAULT_CDN_CNAME = "https://ucarecdn.com";
 
 export const DEFAULT_HLS_OPTIONS = {
@@ -11,7 +9,7 @@ export const DEFAULT_HLS_OPTIONS = {
     nativeTextTracks: false,
 
     vhs: {
-      overrideNative: videojs && videojs.browser ? !videojs.browser.IS_IOS && !videojs.browser.IS_SAFARI : true,
+      overrideNative: true
     },
   },
 };
