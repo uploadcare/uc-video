@@ -1,0 +1,12 @@
+.vjs-uc-logo {
+  background: url("https://ucarecdn.com/edfdf045-34c0-4087-bbdd-e3834921f890/userpiccircletransparent.svg");
+  background-size: 16px;
+  background-repeat: no-repeat;
+  background-position: center;
+
+  transition: transform .3s ease;
+}
+
+.vjs-uc-logo:hover {
+  transform: scale(0.9);
+}

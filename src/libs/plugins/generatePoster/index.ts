@@ -1,0 +1,1 @@
+export { GeneratePoster } from './GeneratePoster'
