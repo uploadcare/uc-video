@@ -22,7 +22,7 @@
     "@biomejs/biome": "1.9.3",
     "typescript": "^5.5.3",
     "video.js": "^8.17.4",
-    "vite": "^5.4.1"
+    "vite": "^5.4.12"
   },
   "peerDependencies": {
     "video.js": "^8"
