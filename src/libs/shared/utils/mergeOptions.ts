@@ -5,38 +5,26 @@ function camelize(str: string) {
 	});
 }
 
-export const parseValue = (original: string, value: string) => {
-	if (!value) {
-		return original;
-	}
-	if (typeof original === "number") {
-		return Number.parseFloat(value);
-	}
-	if (typeof original === "boolean") {
-		return value === "true";
-	}
-	if (typeof original === "string") {
-		return value;
-	}
 
-	if (typeof value === "string") {
-		value = JSON.parse(value);
-	}
-
-	return value;
-};
-
-export const mergeOptions = (dataset, options) => {
+export const mergeOptions = (attributes, options) => {
 	const result: Record<string, unknown> = {};
 
 	for (const key in options) {
 		const camelKey = camelize(key);
 
-		result[key] = parseValue(options[key], dataset[camelKey]?.value);
+		try {
+			if (attributes[camelKey]) {
+				const { value } = attributes[camelKey]
+				result[key] = options[key].validator(value)
+			} else {
+				result[key] = options[key].value
+			}
+		} catch (reason) {
+			console.error(`Invalid value for config key "${key}".`, reason);
+		}
 	}
 
 	console.log({ result });
-
 
 	return result;
 };

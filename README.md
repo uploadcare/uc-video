@@ -9,13 +9,12 @@
 </p>
 
 # Uploadcare Video Delivery
-The uc-video solution, powered by Video.js, offers a seamless and high-performance video streaming experience.
+This is Uploadcare's video solution, powered by Video.js, offers a seamless and high-performance video streaming experience.
 
 ## Features
 - **Optimized Streaming Quality:** Dynamically adjusts video quality based on the viewer’s device and internet speed, ensuring the best possible viewing experience.
 - **Cost-Effective Bandwidth Usage:** Reduces data consumption by delivering only the necessary video resolution, saving on bandwidth costs, especially for users with slower connections or smaller screens.
 - **Enhanced User Experience:** Minimizes buffering and delays, providing smooth and uninterrupted playback, even on less reliable networks, leading to higher user engagement and satisfaction.
-- **Broad Device Compatibility:** Automatically adapts to a wide range of devices and network conditions, expanding accessibility and reach.
 - **Seamless Integration:** Easy to use—simply upload your video file, and instantly receive a link for adaptive streaming, enabling quick deployment and management without technical complexities.
 
 ## Quick Start
@@ -29,17 +28,32 @@ import '@uploadcare/uc-video/style'
 ```
 3. Add component in your application markup:
 ```html
-<uc-video src="URL_FROM_UPLOADCARE"></uc-video>
+<uc-video uuid="UUID_FILE_FROM_UPLOADCARE"></uc-video>
 ```
 
 ### From CDN
+1. Connect `UCVideo` directly from your document:
+```html
+<script type="module">
+  import 'https://cdn.jsdelivr.net/npm/@uploadcare/uc-video/dist/uc-video.js';
+</script>
+```
+2. Add `UCVideo` in your application markup:
+```html
+<link
+  rel="stylesheet"
+  href="https://cdn.jsdelivr.net/npm/@uploadcare/uc-video/dist/style.css"
+/>
+
+<uc-video uuid="UUID_FILE_FROM_UPLOADCARE"> </uc-video>
+```
 
 ## Attributes
 UC Video is provided all the [options][video-js-options] from video.js and some unique proprietary attributes
 
-- **UUID**: file uuid
-- **src**: cdn url
-- **data-offset**: attribute to get the right frame for the poster
+- **UUID**: file uuid from uploadcare
+- **posterOffset**: to get a frame from the video for the poster. Example: `posterOffset="1:30"` is `90sec`
+- **showLogo**: shows the logo, default is `true`
 
 ## Framework support
 Uploadcare Video Delivery is built with Web Components, meaning you can integrate it into any environment—no adapters required.

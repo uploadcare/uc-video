@@ -1,0 +1,4 @@
+.vjs-poster img {
+  object-position: center;
+  object-fit: cover;
+}

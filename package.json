@@ -1,8 +1,10 @@
 {
   "name": "@uploadcare/uc-video",
   "private": false,
-  "version": "0.0.0-alpha.4",
-  "files": ["dist"],
+  "version": "0.1.4",
+  "files": [
+    "dist"
+  ],
   "type": "module",
   "main": "./dist/uc-video.umd.cjs",
   "module": "./dist/uc-video.js",
@@ -27,6 +29,11 @@
   "peerDependencies": {
     "video.js": "^8"
   },
+  "peerDependenciesMeta": {
+    "video.js": {
+      "optional": true
+    }
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/uploadcare/uc-video.git"
@@ -48,5 +55,8 @@
     "adaptive-video",
     "hls",
     "html5"
-  ]
+  ],
+  "dependencies": {
+    "vite-plugin-dts": "^4.2.4"
+  }
 }
