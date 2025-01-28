@@ -2,55 +2,89 @@ import videojs from "video.js";
 import type Player from "video.js/dist/types/player";
 import { BasePlugin } from "../BasePlugin";
 import { VIDEO_PLAYER_EVENTS, type TOptions } from "../../shared/settings";
+import './poster.css'
+import { timeToSeconds } from "../../shared/utils/timeToSeconds";
 
+const INIT_TIME = 0
+
+const defaultOptions = {
+  posterOffset: INIT_TIME
+}
 export class GeneratePoster extends BasePlugin {
   #videoEl: HTMLVideoElement | null = null;
-  #offset: string | number | null = null;
-  #poster: string | undefined = "";
+  #posterOffset: string | number | null = null
 
   constructor(player: Player, options: TOptions) {
     super(player, options);
 
     this.#videoEl = options.videoEl;
-    this.#offset = options.offset || 2;
+    this.#posterOffset = options.posterOffset ? timeToSeconds(options.posterOffset) : defaultOptions.posterOffset;
 
-    this.#poster = this?._player?.poster();
-
-    this.on(this._player, VIDEO_PLAYER_EVENTS.LOADED_METADATA, () => {
-      if (!this.#poster) {
-
-        if (this.#offset > this._player.duration()) {
-          throw Error(`The provided offset value ${this.#offset} exceeds the total duration: ${this._player.duration()}. Please adjust the offset to be less than or equal to the duration.`)
-        }
-
-        this._player.currentTime(this.#offset);
-        this._player.on("seeked", () => {
-          this.#createPosterFromTimecode();
-
-          this._player.off("seeked");
-        });
-      }
-    });
-  }
-
-  #createPosterFromTimecode() {
-    const canvas = document.createElement("canvas");
-    const context = canvas.getContext("2d");
-
-    canvas.width = this.#videoEl.videoWidth;
-    canvas.height = this.#videoEl.videoHeight;
-
-    context?.drawImage(this.#videoEl, 0, 0, canvas.width, canvas.height);
-
-    try {
-      const posterDataUrl = canvas.toDataURL("image/png");
-
-      this._player.poster(posterDataUrl);
-    } catch (error) {
-      console.log(error);
+    if (options.crossOrigin) {
+      this.#videoEl.crossOrigin = options.crossOrigin;
     }
 
-    this._player.currentTime(0);
+    this.on(this._player, VIDEO_PLAYER_EVENTS.READY, () => {
+      this.#checkAndSetPoster();
+    })
+  }
+
+  #checkAndSetPoster() {
+    const existingPoster = this._player.poster();
+
+    if (!existingPoster) {
+      this.on(this._player, VIDEO_PLAYER_EVENTS.LOADED_METADATA, () => {
+        this._player.currentTime(this.#posterOffset);
+        this._player.on(VIDEO_PLAYER_EVENTS.SEEKED, () => {
+          this.#captureFrameAndSetPoster();
+
+          this._player.off(VIDEO_PLAYER_EVENTS.SEEKED)
+        })
+      })
+    }
+  }
+
+  async #captureFrameAndSetPoster() {
+    const duration = this._player.duration();
+    // const captureTime = Math.min(this.#posterOffset, duration);
+
+    if (this.#posterOffset > duration) {
+      console.warn(
+        `Capture time (${this.#posterOffset}s) exceeds video duration (${duration}s). Using last frame.`
+      );
+    }
+
+    try {
+      const frameURL = await this.#captureFrameAtTime();
+      this._player.poster(frameURL as string); // Set the captured frame as the poster
+    } catch (error) {
+      console.error('Error setting poster:', error);
+    }
+  }
+
+  #captureFrameAtTime() {
+    return new Promise((resolve, reject) => {
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
+      canvas.width = this.#videoEl?.videoWidth || 0;
+      canvas.height = this.#videoEl?.videoHeight || 0;
+
+
+      if (!context) {
+        reject('Failed to get canvas context');
+        return;
+      }
+
+      try {
+        context.drawImage(this.#videoEl, 0, 0, canvas.width, canvas.height);
+        const dataURL = canvas.toDataURL('image/jpeg');
+        resolve(dataURL);
+      } catch (error) {
+        reject('Failed to capture frame: ' + error.message);
+      } finally {
+        this._player.currentTime(INIT_TIME);
+      }
+    })
   }
 }
 

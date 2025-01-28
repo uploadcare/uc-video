@@ -3,28 +3,38 @@ import "video.js/dist/video-js.css";
 import type Player from "video.js/dist/types/player";
 
 import plugins from "./plugins";
+
 import {
-  COMMON_OPTIONS,
+  __LIST_ATTRIBUTES,
+  DEFAULT_CDN_CNAME,
+  DEFAULT_HLS_OPTIONS,
   SOURCES_MIME_TYPES,
-  type TProps,
 } from "./shared/settings";
+
 import { mergeOptions } from "./shared/utils/mergeOptions";
 import { createSrcVideoAdaptive } from "./shared/url/createSrcVideoAdaptive";
+import type { Options } from "./shared/schema";
+import { getMimeType } from "./shared/url/getMimeType";
 
 for (const [name, plugin] of Object.entries(plugins)) {
   videojs.registerPlugin(name, plugin);
 }
 
 export class UCVideo extends HTMLElement {
-  #player: Player | null = null;
-  #options?: TProps = COMMON_OPTIONS;
+  #player: Player & {
+    httpSourceSelector: (options: { default: "auto" | "low" | "high" }) => void;
+    generatePoster: (options: { videoEl: HTMLVideoElement, posterOffset: string | number, crossOrigin?: 'anonymous' | 'use-credentials' }) => void;
+    addLogo: () => void;
+  } | null = null;
+  #options?: Options;
   #videoEl: HTMLVideoElement | null = null;
 
+  static get observedAttributes() {
+    return Object.keys(__LIST_ATTRIBUTES);
+  }
+
   connectedCallback() {
-    this.#options = mergeOptions(
-      this.attributes,
-      COMMON_OPTIONS
-    )
+    this.#options = videojs.obj.merge(mergeOptions(this.attributes, __LIST_ATTRIBUTES), DEFAULT_HLS_OPTIONS)
 
     this.#renderElVideo().then((videoEl) => this.#initPlayer(videoEl));
   }
@@ -34,6 +44,11 @@ export class UCVideo extends HTMLElement {
       this.#player.dispose();
       this.innerHTML = "";
     }
+  }
+
+  attributeChangedCallback() {
+    // Called when observed attributes change
+    // console.log(`Attribute ${name} changed from ${oldValue} to ${newValue}`);
   }
 
   #initPlayer(videoEl: HTMLVideoElement) {
@@ -60,7 +75,7 @@ export class UCVideo extends HTMLElement {
   #initPlugins() {
     this.#initQualityHls();
     this.#initGeneratePoster();
-    this.#initLogo()
+    this.#initLogo();
   }
 
   #initQualityHls() {
@@ -70,26 +85,34 @@ export class UCVideo extends HTMLElement {
   #initGeneratePoster() {
     this.#player?.generatePoster({
       videoEl: this.#videoEl,
-      offset: this.#options?.["data-offset"],
+      posterposterOffset: this.#options?.posterOffset,
+      crossOrigin: this.#options?.crossorigin
     });
   }
 
   #initLogo() {
-    if (!this.#options?.showLogo) return
+    if (!this.#options?.showLogo) return;
 
-    this.#player?.addLogo()
+    this.#player?.addLogo();
   }
 
   #listenerErrors() { }
 
-  #calcSrc() {
-    const src = this.#options?.src ? this.#options?.src : this.#options.uuid ? createSrcVideoAdaptive(this.#options?.cdnCname, this.#options?.uuid) : false
 
-    if (!src) {
-      this.#player?.error('Please provide a valid uuid or src to ensure proper video delivery.')
-      throw new Error('Please provide a valid uuid or src to ensure proper video delivery.')
+  /* Function to get mime type from a request */
+  async #getVideoSources(src) {
+    return await getMimeType(src);
+  }
+
+  #calcSrc() {
+    if (!this.#options?.uuid) {
+      throw new Error("Add a uuid");
     }
 
+    const src = createSrcVideoAdaptive(
+      this.#options?.cdnCname || DEFAULT_CDN_CNAME,
+      this.#options?.uuid,
+    );
 
     this.#player?.src({
       src,

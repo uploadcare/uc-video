@@ -1,3 +1,11 @@
+import { type OptionRecord, Preload, type Options } from "./schema";
+import {
+  asArrayNumber,
+  asBoolean,
+  asNumber,
+  asString,
+} from "./utils/validators";
+
 export const DEFAULT_CDN_CNAME = "https://ucarecdn.com";
 
 export const DEFAULT_HLS_OPTIONS = {
@@ -9,58 +17,82 @@ export const DEFAULT_HLS_OPTIONS = {
     nativeTextTracks: false,
 
     vhs: {
-      overrideNative: true
+      overrideNative: true,
     },
   },
 };
 
-export const COMMON_OPTIONS: TProps = {
-  __namespace: "uc-video",
-
-  controls: true,
-  fluid: true,
-  loop: false,
-  muted: false,
-  poster: "",
-  preload: "auto",
-  src: "",
-  uuid: "",
-  // crossorigin: "anonymous",
-  playbackRates: [],
-
-  cdnCname: DEFAULT_CDN_CNAME,
-  showLogo: true,
-
-  'data-offset': undefined,
-
-  ...DEFAULT_HLS_OPTIONS
+export const __LIST_ATTRIBUTES: OptionRecord<Options> = {
+  controls: {
+    validator: asBoolean,
+    value: false,
+  },
+  height: {
+    validator: asNumber,
+    value: "",
+  },
+  loop: {
+    validator: asBoolean,
+    value: false,
+  },
+  muted: {
+    validator: asBoolean,
+    value: false,
+  },
+  poster: {
+    validator: asString,
+    value: "",
+  },
+  preload: {
+    validator: asString,
+    value: Preload.AUTO,
+  },
+  width: {
+    validator: asString,
+    value: "",
+  },
+  uuid: {
+    validator: asString,
+    value: "",
+  },
+  autoplay: {
+    validator: asBoolean,
+    value: false,
+  },
+  posterOffset: {
+    validator: asString,
+    value: "",
+  },
+  showLogo: {
+    validator: asBoolean,
+    value: true,
+  },
+  fluid: {
+    validator: asBoolean,
+    value: false,
+  },
+  playbackRates: {
+    validator: asArrayNumber,
+    value: undefined
+  },
+  cdnCname: {
+    validator: asString,
+    value: DEFAULT_CDN_CNAME,
+  },
+  crossorigin: {
+    validator: asString,
+    value: undefined,
+  },
+  playsinline: {
+    validator: asBoolean,
+    value: false,
+  }
 };
 
 export const SOURCES_MIME_TYPES = {
-  hls: "application/x-mpegURL", // application/vnd.apple.mpegurl
-};
-
-export type TProps = {
-  __namespace?: "uc-video";
-
-  controls?: boolean;
-  height?: string | number;
-  loop?: boolean;
-  muted?: boolean;
-  poster?: string;
-  preload?: "auto" | "metadata" | "none";
-  width?: string | number;
-  fluid?: boolean;
-
-  src?: string;
-  uuid?: string;
-  crossorigin?: string
-  playbackRates?: string[]
-
-  cdnCname?: string;
-  showLogo?: boolean
-
-  'data-offset'?: number
+  hls: "application/x-mpegURL",
+  hlsFromContentType: "application/vnd.apple.mpegurl",
+  mp4: "video/mp4",
 };
 
 export enum VIDEO_PLAYER_EVENTS {
@@ -69,6 +101,7 @@ export enum VIDEO_PLAYER_EVENTS {
   PLAYING = "playing",
   PAUSE = "pause",
   SEEK = "seek",
+  SEEKED = "seeked",
   SEEKING = "seeking",
   MUTE = "mute",
   UNMUTE = "unmute",
@@ -105,5 +138,4 @@ export enum VIDEO_PLAYER_EVENTS {
   QUALITY_CHANGED = "qualitychanged",
 }
 
-
-export type TOptions = Record<string, unknown>
+export type TOptions = Record<string, unknown>;

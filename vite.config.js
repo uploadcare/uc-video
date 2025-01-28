@@ -1,6 +1,7 @@
 // vite.config.js
 import { resolve } from "path";
 import { defineConfig } from "vite";
+import dts from "vite-plugin-dts";
 
 const PACKAGE_NAME = "uc-video";
 
@@ -12,12 +13,15 @@ export default defineConfig({
       fileName: PACKAGE_NAME,
     },
     rollupOptions: {
-      external: ["video.js"],
+      external: [],
       output: {
-        globals: {
-          videojs: "video.js",
-        },
+        globals: {},
       },
     },
   },
+  plugins: [
+    dts({
+      insertTypesEntry: true,
+    }),
+  ],
 });
