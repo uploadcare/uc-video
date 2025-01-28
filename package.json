@@ -1,7 +1,7 @@
 {
   "name": "@uploadcare/uc-video",
   "private": false,
-  "version": "0.1.4-alpha.1",
+  "version": "0.1.4",
   "files": [
     "dist"
   ],
@@ -17,7 +17,7 @@
   },
   "scripts": {
     "dev": "vite build --watch",
-    "build": " vite build ",
+    "build": "tsc && vite build",
     "preview": "vite preview"
   },
   "devDependencies": {
