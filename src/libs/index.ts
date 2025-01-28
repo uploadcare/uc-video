@@ -5,7 +5,7 @@ import type Player from "video.js/dist/types/player";
 import plugins from "./plugins";
 
 import {
-  __LIST_ATTRIBUTES,
+  LIST_ATTRIBUTES,
   DEFAULT_CDN_CNAME,
   DEFAULT_HLS_OPTIONS,
   SOURCES_MIME_TYPES,
@@ -14,7 +14,6 @@ import {
 import { mergeOptions } from "./shared/utils/mergeOptions";
 import { createSrcVideoAdaptive } from "./shared/url/createSrcVideoAdaptive";
 import type { Options } from "./shared/schema";
-import { getMimeType } from "./shared/url/getMimeType";
 
 for (const [name, plugin] of Object.entries(plugins)) {
   videojs.registerPlugin(name, plugin);
@@ -30,11 +29,11 @@ export class UCVideo extends HTMLElement {
   #videoEl: HTMLVideoElement | null = null;
 
   static get observedAttributes() {
-    return Object.keys(__LIST_ATTRIBUTES);
+    return Object.keys(LIST_ATTRIBUTES);
   }
 
   connectedCallback() {
-    this.#options = videojs.obj.merge(mergeOptions(this.attributes, __LIST_ATTRIBUTES), DEFAULT_HLS_OPTIONS)
+    this.#options = videojs.obj.merge(mergeOptions(this.attributes, LIST_ATTRIBUTES), DEFAULT_HLS_OPTIONS)
 
     this.#renderElVideo().then((videoEl) => this.#initPlayer(videoEl));
   }
@@ -46,18 +45,13 @@ export class UCVideo extends HTMLElement {
     }
   }
 
-  attributeChangedCallback() {
-    // Called when observed attributes change
-    // console.log(`Attribute ${name} changed from ${oldValue} to ${newValue}`);
-  }
+  attributeChangedCallback() { }
 
   #initPlayer(videoEl: HTMLVideoElement) {
     if (!this.#player && videoEl) {
       this.#player = videojs(videoEl, this.#options);
 
       this.#calcSrc();
-
-      this.#listenerErrors();
       this.#initPlugins();
     }
   }
@@ -85,7 +79,7 @@ export class UCVideo extends HTMLElement {
   #initGeneratePoster() {
     this.#player?.generatePoster({
       videoEl: this.#videoEl,
-      posterposterOffset: this.#options?.posterOffset,
+      posterOffset: this.#options?.posterOffset,
       crossOrigin: this.#options?.crossorigin
     });
   }
@@ -94,14 +88,6 @@ export class UCVideo extends HTMLElement {
     if (!this.#options?.showLogo) return;
 
     this.#player?.addLogo();
-  }
-
-  #listenerErrors() { }
-
-
-  /* Function to get mime type from a request */
-  async #getVideoSources(src) {
-    return await getMimeType(src);
   }
 
   #calcSrc() {

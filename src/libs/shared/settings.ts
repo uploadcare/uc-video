@@ -22,7 +22,7 @@ export const DEFAULT_HLS_OPTIONS = {
   },
 };
 
-export const __LIST_ATTRIBUTES: OptionRecord<Options> = {
+export const LIST_ATTRIBUTES: OptionRecord<Options> = {
   controls: {
     validator: asBoolean,
     value: false,
