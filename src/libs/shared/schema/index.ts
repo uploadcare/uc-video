@@ -35,7 +35,7 @@ export type Options = {
 }
 
 // Generic type for the validator and value system
-export type ValidatorFn<T> = (value: unknown) => asserts value is T;
+export type ValidatorFn<T> = (value: T) => asserts value is T;
 
 export type OptionRecord<T> = {
   [K in keyof T]: {
@@ -43,4 +43,6 @@ export type OptionRecord<T> = {
     value: T[K];
   };
 };
+
+
 

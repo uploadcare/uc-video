@@ -1,6 +1,5 @@
 import videojs from "video.js";
 import "video.js/dist/video-js.css";
-import type Player from "video.js/dist/types/player";
 
 import plugins from "./plugins";
 
@@ -14,17 +13,15 @@ import {
 import { mergeOptions } from "./shared/utils/mergeOptions";
 import { createSrcVideoAdaptive } from "./shared/url/createSrcVideoAdaptive";
 import type { Options } from "./shared/schema";
+import { VideoPlayer } from "./shared/schema/player";
 
 for (const [name, plugin] of Object.entries(plugins)) {
   videojs.registerPlugin(name, plugin);
 }
 
+
 export class UCVideo extends HTMLElement {
-  #player: Player & {
-    httpSourceSelector: (options: { default: "auto" | "low" | "high" }) => void;
-    generatePoster: (options: { videoEl: HTMLVideoElement, posterOffset: string | number, crossOrigin?: 'anonymous' | 'use-credentials' }) => void;
-    addLogo: () => void;
-  } | null = null;
+  #player: VideoPlayer | null = null;
   #options?: Options;
   #videoEl: HTMLVideoElement | null = null;
 
@@ -49,7 +46,7 @@ export class UCVideo extends HTMLElement {
 
   #initPlayer(videoEl: HTMLVideoElement) {
     if (!this.#player && videoEl) {
-      this.#player = videojs(videoEl, this.#options);
+      this.#player = videojs(videoEl, this.#options) as VideoPlayer;
 
       this.#calcSrc();
       this.#initPlugins();

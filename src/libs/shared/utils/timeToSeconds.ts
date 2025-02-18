@@ -1,4 +1,4 @@
-export const timeToSeconds = (time: string) => {
+export const timeToSeconds = (time: string): number => {
   const parts = time.split(':').map(Number).reverse();
 
   if (parts.some(isNaN)) {

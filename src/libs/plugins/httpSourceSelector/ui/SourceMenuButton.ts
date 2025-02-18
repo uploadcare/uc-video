@@ -1,11 +1,13 @@
 import videojs from "video.js";
 import SourceMenuItem from "./SourceMenuItem.js";
 import type Player from "video.js/dist/types/player.js";
+import { TOptions } from "../../../shared/settings.js";
 
 const MenuButton = videojs.getComponent("MenuButton");
 
 class SourceMenuButton extends MenuButton {
-  constructor(player: Player, options: { default: "high" | "low" }) {
+  constructor(player: Player, options: TOptions & { default: "high" | "low" }) {
+    // @ts-ignore
     super(player, options);
     const qualityLevels = this.player_.qualityLevels();
 
@@ -44,6 +46,7 @@ class SourceMenuButton extends MenuButton {
   }
 
   update() {
+    // @ts-ignore
     return MenuButton.prototype.update.call(this);
   }
 
@@ -51,7 +54,7 @@ class SourceMenuButton extends MenuButton {
     const menuItems = [];
     const levels = this.player_.qualityLevels();
 
-    const labels = [];
+    const labels = [] as unknown[];
 
     for (let index = levels.length - 1; index >= 0; index--) {
       const selected = index === levels.selectedIndex;

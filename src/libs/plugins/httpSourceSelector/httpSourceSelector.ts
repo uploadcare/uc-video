@@ -16,15 +16,18 @@ const CSS_VJS_HTTP_SELECTOR = "vjs-http-source-selector";
 
 const defaults = {}
 
-export class HttpSourceSelector extends BasePlugin {
-  constructor(player: Player, options: TOptions) {
+export class HttpSourceSelector extends BasePlugin<Player & { videojsHTTPSouceSelectorInitialized: boolean; controlBar: any }> {
+  constructor(player: Player & { videojsHTTPSouceSelectorInitialized: boolean }, options: TOptions) {
+    // @ts-ignore
     videojs.registerComponent("SourceMenuButton", SourceMenuButton);
     videojs.registerComponent("SourceMenuItem", SourceMenuItem);
 
     const merge = (videojs.obj && videojs.obj.merge) || videojs.mergeOptions;
     const settings = merge(defaults, options);
+    // @ts-ignore
     super(player, settings);
 
+    // @ts-ignore
     this.on(player, VIDEO_PLAYER_EVENTS.READY, () => {
       this.#reset();
       this.#init();
@@ -36,6 +39,7 @@ export class HttpSourceSelector extends BasePlugin {
     this._player.videojsHTTPSouceSelectorInitialized = true;
 
     if (this._player.techName_ === "Html5") {
+      // @ts-ignore
       this.on(this._player, VIDEO_PLAYER_EVENTS.LOADED_METADATA, () =>
         this.#metadataLoaded(),
       );
@@ -46,6 +50,7 @@ export class HttpSourceSelector extends BasePlugin {
 
   #reset() {
     this._player.removeClass(CSS_VJS_HTTP_SELECTOR);
+
     if (this._player.videojsHTTPSouceSelectorInitialized === true) {
       if (!this._player.controlBar.getChild("SourceMenuButton")) {
         this._player.controlBar.removeChild("SourceMenuButton", {});

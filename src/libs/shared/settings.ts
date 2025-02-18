@@ -73,7 +73,7 @@ export const LIST_ATTRIBUTES: OptionRecord<Options> = {
   },
   playbackRates: {
     validator: asArrayNumber,
-    value: undefined
+    value: [0.5, 1, 1.5, 2],
   },
   cdnCname: {
     validator: asString,

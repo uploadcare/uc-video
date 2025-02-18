@@ -25,3 +25,6 @@ dist-ssr
 
 *.env
 *.env.production
+
+**/*.d.ts
+**/*.d.ts.map
