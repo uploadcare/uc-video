@@ -20,7 +20,8 @@
     "dev": "vite build --watch",
     "build": "tsc && npm run build:types && vite build",
     "build:types": "tsc --project tsconfig.types.json",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "release": "npx semantic-release"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.3",
