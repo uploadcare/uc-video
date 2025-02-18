@@ -21,12 +21,12 @@ This is Uploadcare's video solution, powered by Video.js, offers a seamless and 
 
 ### From NPM
 1. Install the package: `npm install @uploadcare/uc-video`
-2. Connect component from your script file
+2. Connect the component from your script file:
 ```js
 import '@uploadcare/uc-video';
 import '@uploadcare/uc-video/style'
 ```
-3. Add component in your application markup:
+3. Add the component in your application markup:
 ```html
 <uc-video uuid="UUID_FILE_FROM_UPLOADCARE"></uc-video>
 ```
@@ -49,13 +49,13 @@ import '@uploadcare/uc-video/style'
 ```
 
 ## Attributes
-UC Video is provided all the [options][video-js-options] from video.js and some unique proprietary attributes
+UC Video provides all the [options][video-js-options] from video.js and some unique proprietary attributes:
 
-- **UUID**: file uuid from uploadcare
+- **UUID**: file uuid from Uploadcare
 - **posterOffset**: to get a frame from the video for the poster. Example: `posterOffset="1:30"` is `90sec`
 - **showLogo**: shows the logo, default is `true`
 
 ## Framework support
-Uploadcare Video Delivery is built with Web Components, meaning you can integrate it into any environment—no adapters required.
+Uploadcare Video Delivery is built with Web Components, meaning you can integrate it into any environment — no adapters required.
 
 [video-js-options]: https://videojs.com/guides/options/
