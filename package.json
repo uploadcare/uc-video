@@ -1,7 +1,7 @@
 {
   "name": "@uploadcare/uc-video",
   "private": false,
-  "version": "0.1.4",
+  "version": "0.1.4-alpha.2",
   "files": [
     "dist"
   ],
@@ -13,11 +13,13 @@
       "import": "./dist/uc-video.js",
       "require": "./dist/uc-video.umd.cjs"
     },
-    "./style": "./dist/style.css"
+    "./style": "./dist/style.css",
+    "./types/jsx": "./src/libs/types/jsx.d.ts"
   },
   "scripts": {
     "dev": "vite build --watch",
-    "build": "tsc && vite build",
+    "build": "tsc && npm run build:types && vite build",
+    "build:types": "tsc --project tsconfig.types.json",
     "preview": "vite preview"
   },
   "devDependencies": {
@@ -61,6 +63,8 @@
     "html5"
   ],
   "dependencies": {
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^6.0.1",
     "vite-plugin-dts": "^4.2.4"
   }
 }

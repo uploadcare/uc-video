@@ -15,6 +15,7 @@ class SourceMenuItem extends MenuItem {
   handleClick() {
     const selected = this.options_;
 
+    // @ts-ignore
     super.handleClick();
 
     const levels = [...this.player_.qualityLevels().levels_];
@@ -27,10 +28,10 @@ class SourceMenuItem extends MenuItem {
 
   update() {
     const selectedIndex = this.player_.qualityLevels().selectedIndex;
-
+    // @ts-ignore
     this.selected(this.options_.index === selectedIndex);
   }
 }
-
+// @ts-ignore
 Component.registerComponent("SourceMenuItem", SourceMenuItem);
 export default SourceMenuItem;
