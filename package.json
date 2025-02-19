@@ -1,6 +1,6 @@
 {
   "name": "@uploadcare/uc-video",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "description": "Uploadcare's UCVideo solution for adaptive bitrate streaming",
   "keywords": [
     "uploadcare",
