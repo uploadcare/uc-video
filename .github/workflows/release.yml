@@ -34,8 +34,6 @@ jobs:
           git config --global user.name "github-actions[bot]"
       - name: Build package
         run: npm run build
-      - name: Configure NPM Auth
-        run: echo "//registry.npmjs.org/:_authToken=${NPM_AUTH_TOKEN}" > ~/.npmrc
       - name: Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

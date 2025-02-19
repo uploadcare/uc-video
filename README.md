@@ -1,5 +1,5 @@
 <p align="center">
-  <a href="https://uploadcare.com/?ref=react-uploader">
+  <a href="https://uploadcare.com/?ref=uc-video">
     <picture>
       <source media="(prefers-color-scheme: light)" srcset="https://ucarecdn.com/1b4714cd-53be-447b-bbde-e061f1e5a22f/logosafespacetransparent.svg">
       <source media="(prefers-color-scheme: dark)" srcset="https://ucarecdn.com/3b610a0a-780c-4750-a8b4-3bf4a8c90389/logotransparentinverted.svg">
@@ -7,8 +7,21 @@
     </picture>
   </a>
 </p>
+<p align="center">
+  <a href="https://uploadcare.com/?ref=uc-video">Website</a> •
+  <a href="https://uploadcare.com/docs/adaptive-bitrate-streaming/?ref=uc-video">Docs</a> • 
+  <a href="https://uploadcare.com/blog?ref=uc-video">Blog</a> • 
+  <a href="https://discord.gg/mKWRgRsVz8?ref=uc-video">Discord</a> •
+  <a href="https://twitter.com/Uploadcare?ref=uc-video">Twitter</a>
+</p>
 
 # Uploadcare Video Delivery
+
+[![NPM version][npm-img]][npm-url]
+[![Build Status][badge-build]][build-url]
+[![GitHub release][badge-release-img]][badge-release-url]
+[![Uploadcare stack on StackShare][badge-stack-img]][badge-stack-url]
+
 This is Uploadcare's video solution, powered by Video.js, offers a seamless and high-performance video streaming experience.
 
 ## Features
@@ -20,7 +33,10 @@ This is Uploadcare's video solution, powered by Video.js, offers a seamless and 
 ## Quick Start
 
 ### From NPM
-1. Install the package: `npm install @uploadcare/uc-video`
+1. Install the package: 
+```bash
+npm install @uploadcare/uc-video
+```
 2. Connect the component from your script file:
 ```js
 import '@uploadcare/uc-video';
@@ -57,5 +73,33 @@ UC Video provides all the [options][video-js-options] from video.js and some uni
 
 ## Framework support
 Uploadcare Video Delivery is built with Web Components, meaning you can integrate it into any environment — no adapters required.
+
+## Security issues
+
+If you think you ran into something in Uploadcare libraries that might have
+security implications, please hit us up at
+[bugbounty@uploadcare.com][uc-email-bounty] or Hackerone.
+
+We'll contact you personally in a short time to fix an issue through co-op and
+prior to any public disclosure.
+
+## Feedback
+
+Issues and PRs are welcome. You can provide your feedback or drop us a support
+request at [hello@uploadcare.com][uc-email-hello].
+
+[uc-email-bounty]: mailto:bugbounty@uploadcare.com
+[uc-email-hello]: mailto:hello@uploadcare.com
+[github-releases]: https://github.com/uploadcare/uc-video/releases
+[github-branch-release]: https://github.com/uploadcare/uc-video/tree/release
+[github-contributors]: https://github.com/uploadcare/uc-video/graphs/contributors
+[badge-stack-img]: https://img.shields.io/badge/tech-stack-0690fa.svg?style=flat
+[badge-stack-url]: https://stackshare.io/uploadcare/stacks/
+[badge-release-img]: https://img.shields.io/github/release/uploadcare/uc-video.svg
+[badge-release-url]: https://github.com/uploadcare/uc-video/releases
+[npm-img]: http://img.shields.io/npm/v/@uploadcare/uc-video.svg
+[npm-url]: https://www.npmjs.com/package/@uploadcare/uc-video
+[badge-build]: https://github.com/uploadcare/uc-video/actions/workflows/checks.yml/badge.svg
+[build-url]: https://github.com/uploadcare/uc-video/actions/workflows/checks.yml
 
 [video-js-options]: https://videojs.com/guides/options/
