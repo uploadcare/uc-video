@@ -1,0 +1,30 @@
+name: Create Release Branch
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  create-release-branch:
+    name: Create Release Branch
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Get next release version
+        id: version
+        run: echo "VERSION=$(npx semantic-release --dry-run | grep -oP '(?<=The next release version is )[^ ]+')" >> $GITHUB_ENV
+
+      - name: Create and push release branch
+        run: |
+          git checkout -b release/${{ env.VERSION }}
+          git push origin release/${{ env.VERSION }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

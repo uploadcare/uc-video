@@ -1,9 +1,11 @@
-name: Pre-Release
+name: Publish Release
 
 on:
-  push:
+  pull_request:
+    types:
+      - closed
     branches:
-      - release/*
+      - main
 
 permissions:
   contents: write
@@ -12,14 +14,16 @@ permissions:
   id-token: write
 
 jobs:
-  release:
-    name: Pre-Release
+  publish:
+    if: github.event.pull_request.merged == true
+    name: Publish to NPM
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -33,8 +37,8 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
 
-      - name: Run Semantic Release
+      - name: Publish to npm
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
-        run: npm run release
+        run: npm publish --access public
