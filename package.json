@@ -13,8 +13,14 @@
     "html5"
   ],
   "private": false,
-  "files": ["dist", "README.md", "LICENSE"],
-  "sideEffects": ["*.css"],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "sideEffects": [
+    "*.css"
+  ],
   "type": "module",
   "main": "./dist/uc-video.umd.cjs",
   "module": "./dist/uc-video.js",
@@ -34,11 +40,11 @@
     "tsc": "tsc --project tsconfig.json",
     "preview": "vite preview",
     "release": "shipjs prepare",
-    "prepare": "husky"
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@biomejs/biome": "1.9.3",
-    "husky": "^9.1.7",
+    "husky": "^8.0.3",
     "lint-staged": "^15.4.3",
     "shipjs": "0.27.0",
     "typescript": "^5.5.3",
