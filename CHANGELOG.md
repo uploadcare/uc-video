@@ -1,3 +1,12 @@
+## [0.3.4](https://github.com/uploadcare/uc-video/compare/v0.3.3...v0.3.4) (2025-04-08)
+
+
+### Bug Fixes
+
+* updated import for httpSourceSelector ([#29](https://github.com/uploadcare/uc-video/issues/29)) ([9a02776](https://github.com/uploadcare/uc-video/commit/9a02776f80f590f97b02aa8f6c8718611fb80e59))
+
+
+
 ## [0.3.3](https://github.com/uploadcare/uc-video/compare/v0.3.2...v0.3.3) (2025-02-19)
 
 
