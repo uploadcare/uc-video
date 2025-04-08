@@ -19,7 +19,6 @@ for (const [name, plugin] of Object.entries(plugins)) {
   videojs.registerPlugin(name, plugin);
 }
 
-
 export class UCVideo extends HTMLElement {
   #player: VideoPlayer | null = null;
   #options?: Options;
@@ -30,7 +29,10 @@ export class UCVideo extends HTMLElement {
   }
 
   connectedCallback() {
-    this.#options = videojs.obj.merge(mergeOptions(this.attributes, LIST_ATTRIBUTES), DEFAULT_HLS_OPTIONS)
+    this.#options = videojs.obj.merge(
+      mergeOptions(this.attributes, LIST_ATTRIBUTES),
+      DEFAULT_HLS_OPTIONS
+    );
 
     this.#renderElVideo().then((videoEl) => this.#initPlayer(videoEl));
   }
@@ -42,7 +44,7 @@ export class UCVideo extends HTMLElement {
     }
   }
 
-  attributeChangedCallback() { }
+  attributeChangedCallback() {}
 
   #initPlayer(videoEl: HTMLVideoElement) {
     if (!this.#player && videoEl) {
@@ -69,15 +71,23 @@ export class UCVideo extends HTMLElement {
     this.#initLogo();
   }
 
+  /**
+   * @private
+   * @description Initialize the HLS quality selector plugin
+   */
   #initQualityHls() {
     this.#player?.httpSourceSelector({ default: "auto" });
   }
 
+  /**
+   * @private
+   * @description Initialize the poster generation plugin
+   */
   #initGeneratePoster() {
     this.#player?.generatePoster({
       videoEl: this.#videoEl,
       posterOffset: this.#options?.posterOffset,
-      crossOrigin: this.#options?.crossorigin
+      crossOrigin: this.#options?.crossorigin,
     });
   }
 
@@ -94,14 +104,16 @@ export class UCVideo extends HTMLElement {
 
     const src = createSrcVideoAdaptive(
       this.#options?.cdnCname || DEFAULT_CDN_CNAME,
-      this.#options?.uuid,
+      this.#options?.uuid
     );
 
     this.#player?.src({
       src,
-      type: SOURCES_MIME_TYPES.hls
+      type: SOURCES_MIME_TYPES.hls,
     });
   }
 }
 
-customElements.define("uc-video", UCVideo);
+if (!customElements.get("uc-video")) {
+  customElements.define("uc-video", UCVideo);
+}
