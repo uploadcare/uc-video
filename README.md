@@ -8,53 +8,66 @@
   </a>
 </p>
 <p align="center">
-  <a href="https://uploadcare.com/?ref=uc-video">Website</a> •
-  <a href="https://uploadcare.com/docs/adaptive-bitrate-streaming/?ref=uc-video">Docs</a> • 
-  <a href="https://uploadcare.com/blog?ref=uc-video">Blog</a> • 
+  <a href="https://uploadcare.com/cdn/video-cdn/?utm_source=npm&utm_medium=ucvideo&utm_campaign=video_cdn&utm_content=website_header">Website</a> •
+  <a href="https://uploadcare.com/docs/adaptive-bitrate-streaming/?utm_source=npm&utm_medium=ucvideo&utm_campaign=video_cdn&utm_content=docs_header">Docs</a> • 
+  <a href="https://uploadcare.com/blog/?utm_source=npm&utm_medium=ucvideo&utm_campaign=video_cdn&utm_content=blog_header">Blog</a> • 
   <a href="https://discord.gg/mKWRgRsVz8?ref=uc-video">Discord</a> •
   <a href="https://twitter.com/Uploadcare?ref=uc-video">Twitter</a>
 </p>
 
-# Uploadcare Video Delivery
+# Uploadcare Video Player
 
 [![NPM version][npm-img]][npm-url]
 [![Build Status][badge-build]][build-url]
 [![GitHub release][badge-release-img]][badge-release-url]
 [![Uploadcare stack on StackShare][badge-stack-img]][badge-stack-url]
 
-This is Uploadcare's video solution, powered by Video.js, offers a seamless and high-performance video streaming experience.
+Speed up video releases with our plug-and-play player. It's a part of [Uploadcare Video CDN][uc-video-cdn-page-intro] solution, designed to enable native video streaming on your website or app
+
+<img alt="Uploadcare Video Player examples" src="https://ucarecdn.com/28893843-8e78-4753-a1b2-b567e9f12479/img00045.png">
 
 ## Features
-- **Optimized Streaming Quality:** Dynamically adjusts video quality based on the viewer’s device and internet speed, ensuring the best possible viewing experience.
-- **Cost-Effective Bandwidth Usage:** Reduces data consumption by delivering only the necessary video resolution, saving on bandwidth costs, especially for users with slower connections or smaller screens.
-- **Enhanced User Experience:** Minimizes buffering and delays, providing smooth and uninterrupted playback, even on less reliable networks, leading to higher user engagement and satisfaction.
-- **Seamless Integration:** Easy to use—simply upload your video file, and instantly receive a link for adaptive streaming, enabling quick deployment and management without technical complexities.
+
+- A ready-to-use video player powered by Video.js—no need to build from scratch!
+- Easily integrate anywhere—we support all modern frameworks out of the box, with no adapters required.
+- Provide end users with everything they need for video playback, including basic controls, a quality picker, and picture-in-picture mode.
+- Part of [Uploadcare Video CDN][uc-video-cdn-page-features], that lets you integrate on-demand video-handling infrastructure in minutes and enable immediate playback for your users
 
 ## Quick Start
 
 ### From NPM
-1. Install the package: 
+
+1. Install the package:
+
 ```bash
 npm install @uploadcare/uc-video
 ```
+
 2. Connect the component from your script file:
+
 ```js
-import '@uploadcare/uc-video';
-import '@uploadcare/uc-video/style'
+import "@uploadcare/uc-video";
+import "@uploadcare/uc-video/style";
 ```
+
 3. Add the component in your application markup:
+
 ```html
 <uc-video uuid="UUID_FILE_FROM_UPLOADCARE"></uc-video>
 ```
 
 ### From CDN
+
 1. Connect `UCVideo` directly from your document:
+
 ```html
 <script type="module">
-  import 'https://cdn.jsdelivr.net/npm/@uploadcare/uc-video/dist/uc-video.js';
+  import "https://cdn.jsdelivr.net/npm/@uploadcare/uc-video/dist/uc-video.js";
 </script>
 ```
+
 2. Add `UCVideo` in your application markup:
+
 ```html
 <link
   rel="stylesheet"
@@ -65,14 +78,22 @@ import '@uploadcare/uc-video/style'
 ```
 
 ## Attributes
-UC Video provides all the [options][video-js-options] from video.js and some unique proprietary attributes:
+
+Uploadcare Video Player provides all the [options][video-js-options] from video.js and some unique proprietary attributes:
 
 - **UUID**: file uuid from Uploadcare
 - **posterOffset**: to get a frame from the video for the poster. Example: `posterOffset="1:30"` is `90sec`
 - **showLogo**: shows the logo, default is `true`
 
 ## Framework support
-Uploadcare Video Delivery is built with Web Components, meaning you can integrate it into any environment — no adapters required.
+
+Uploadcare Video Player is built with [Web Components][mdn-web-components], meaning you can integrate it into any environment — no adapters required.
+
+Check our latest [video tutorial][uc-video-tutorial] on integrating Video CDN and subscribe to our channel to more details.
+
+## Browser support
+
+The latest desktop and mobile stable versions of Chrome, Edge, Firefox, Opera, and Safari are supported.
 
 ## Security issues
 
@@ -101,5 +122,8 @@ request at [hello@uploadcare.com][uc-email-hello].
 [npm-url]: https://www.npmjs.com/package/@uploadcare/uc-video
 [badge-build]: https://github.com/uploadcare/uc-video/actions/workflows/checks.yml/badge.svg
 [build-url]: https://github.com/uploadcare/uc-video/actions/workflows/checks.yml
-
 [video-js-options]: https://videojs.com/guides/options/
+[uc-video-tutorial]: https://www.youtube.com/watch?v=EE68Qgmb5fo
+[uc-video-cdn-page-intro]: https://uploadcare.com/cdn/video-cdn/?utm_source=npm&utm_medium=ucvideo&utm_campaign=video_cdn&utm_content=intro
+[uc-video-cdn-page-features]: https://uploadcare.com/cdn/video-cdn/?utm_source=npm&utm_medium=ucvideo&utm_campaign=video_cdn&utm_content=features
+[mdn-web-components]: https://developer.mozilla.org/en-US/docs/Web/API/Web_components
