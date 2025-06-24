@@ -29,6 +29,8 @@ export class UCVideo extends HTMLElement {
   }
 
   connectedCallback() {
+    this.clear();
+
     this.#options = videojs.obj.merge(
       mergeOptions(this.attributes, LIST_ATTRIBUTES),
       DEFAULT_HLS_OPTIONS
@@ -37,11 +39,16 @@ export class UCVideo extends HTMLElement {
     this.#renderElVideo().then((videoEl) => this.#initPlayer(videoEl));
   }
 
-  disconnectedCallback() {
+  clear() {
     if (this.#player) {
       this.#player.dispose();
-      this.innerHTML = "";
+      this.#player = null;
     }
+    this.innerHTML = "";
+  }
+
+  disconnectedCallback() {
+    this.clear();
   }
 
   attributeChangedCallback() {}
