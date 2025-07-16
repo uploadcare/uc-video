@@ -1,48 +1,45 @@
-import videojs from "video.js";
-import SourceMenuItem from "./SourceMenuItem.js";
-import type Player from "video.js/dist/types/player.js";
-import { TOptions } from "../../../shared/settings.js";
+import videojs from 'video.js';
+import type Player from 'video.js/dist/types/player.js';
+import type { TOptions } from '../../../shared/settings.js';
+import SourceMenuItem from './SourceMenuItem.js';
 
-const MenuButton = videojs.getComponent("MenuButton");
+const MenuButton = videojs.getComponent('MenuButton');
 
 class SourceMenuButton extends MenuButton {
-  constructor(player: Player, options: TOptions & { default: "high" | "low" }) {
+  constructor(player: Player, options: TOptions & { default: 'high' | 'low' }) {
     // @ts-ignore
     super(player, options);
     const qualityLevels = this.player_.qualityLevels();
 
     if (options && options.default) {
-      if (options.default === "low") {
+      if (options.default === 'low') {
         for (const [index, qualityLevel] of qualityLevels.entries()) {
           qualityLevel.enabled = index === 0;
         }
-      } else if (options.default === "high") {
+      } else if (options.default === 'high') {
         for (let index = 0; index < qualityLevels.length; index++) {
           qualityLevels[index].enabled = index === qualityLevels.length - 1;
         }
       }
     }
 
-
     this.player_
       .qualityLevels()
       .on(
-        ["change", "addqualitylevel", "removequalitylevel"],
-        videojs.bind(this, this.update),
+        ['change', 'addqualitylevel', 'removequalitylevel'],
+        this.update.bind(this),
       );
   }
 
-
   createEl() {
-    return videojs.dom.createEl("div", {
+    return videojs.dom.createEl('div', {
       className:
-        "vjs-http-source-selector vjs-menu-button vjs-menu-button-popup vjs-control vjs-button custom-class-safari",
+        'vjs-http-source-selector vjs-menu-button vjs-menu-button-popup vjs-control vjs-button custom-class-safari',
     });
   }
 
-
   buildCSSClass() {
-    return MenuButton.prototype.buildCSSClass.call(this) + "vjs-icon-cog";
+    return MenuButton.prototype.buildCSSClass.call(this) + 'vjs-icon-cog';
   }
 
   update() {
@@ -88,7 +85,7 @@ class SourceMenuButton extends MenuButton {
     if (levels.length > 1) {
       menuItems.push(
         new SourceMenuItem(this.player_, {
-          label: "Auto",
+          label: 'Auto',
           index: levels.length,
           selected: false,
           sortValue: 999999,

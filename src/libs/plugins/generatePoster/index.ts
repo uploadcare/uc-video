@@ -1,1 +1,1 @@
-export { GeneratePoster } from './generatePoster'
+export { GeneratePoster } from './generatePoster';

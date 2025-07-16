@@ -1,25 +1,22 @@
-// vite.config.js
-import { resolve } from "path";
-import { defineConfig } from "vite";
-import dts from "vite-plugin-dts";
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { defineConfig } from 'vite';
+import dts from 'vite-plugin-dts';
 
-const PACKAGE_NAME = "uc-video";
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
+  plugins: [dts()],
   build: {
     lib: {
-      entry: resolve(__dirname, "src/libs/index.ts"),
-      name: PACKAGE_NAME,
-      fileName: PACKAGE_NAME,
+      entry: {
+        index: resolve(__dirname, 'src/libs/index.ts'),
+      },
+      name: 'uc-video',
+      fileName: 'uc-video',
     },
     rollupOptions: {
-      external: [],
-      output: {
-        globals: {},
-      },
+      treeshake: 'smallest',
     },
   },
-  plugins: [
-    dts({ insertTypesEntry: true }),
-  ],
 });
