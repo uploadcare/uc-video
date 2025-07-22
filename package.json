@@ -1,6 +1,6 @@
 {
   "name": "@uploadcare/uc-video",
-  "version": "0.3.5",
+  "version": "0.4.0-alpha.1",
   "description": "Uploadcare's UCVideo solution for adaptive bitrate streaming",
   "keywords": [
     "uploadcare",
@@ -18,18 +18,17 @@
     "README.md",
     "LICENSE"
   ],
-  "sideEffects": [
-    "*.css"
-  ],
+  "sideEffects": true,
   "type": "module",
-  "main": "./dist/uc-video.umd.cjs",
-  "module": "./dist/uc-video.js",
+  "main": "./dist/uc-video.umd.js",
+  "module": "./dist/uc-video.es.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/uc-video.js",
-      "require": "./dist/uc-video.umd.cjs"
+      "browser": "./dist/uc-video.es.js",
+      "import": "./dist/uc-video.es.js",
+      "require": "./dist/uc-video.umd.js"
     },
     "./style": "./dist/uc-video.css",
     "./style.css": "./dist/uc-video.css",
@@ -48,7 +47,9 @@
     "prepare": "husky install",
     "clean:dist": "rimraf -g './dist'",
     "clean:types": "rimraf -g './src/libs/**/*.d.ts' && rimraf -g './src/libs/**/*.d.ts.map'",
-    "clean": "run-s clean:*"
+    "clean": "run-s clean:*",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
     "@biomejs/biome": "2.0.6",
@@ -57,7 +58,8 @@
     "shipjs": "0.27.0",
     "typescript": "^5.5.3",
     "video.js": "^8.17.4",
-    "vite": "^7.0.0"
+    "vite": "^7.0.0",
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "video.js": "^8"
