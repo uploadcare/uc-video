@@ -1,126 +1,156 @@
-import videojs from "video.js";
-import "video.js/dist/video-js.css";
-
-import plugins from "./plugins";
-
+import videojs from 'video.js';
+import 'video.js/dist/video-js.css';
+import './base.css';
 import {
-  LIST_ATTRIBUTES,
-  DEFAULT_CDN_CNAME,
-  DEFAULT_HLS_OPTIONS,
-  SOURCES_MIME_TYPES,
-} from "./shared/settings";
-
-import { mergeOptions } from "./shared/utils/mergeOptions";
-import { createSrcVideoAdaptive } from "./shared/url/createSrcVideoAdaptive";
-import type { Options } from "./shared/schema";
-import { VideoPlayer } from "./shared/schema/player";
+  allKeysConfiguration,
+  arrayAttrKeys,
+  attrKeyMapping,
+  initConfiguration,
+} from './configuration';
+import plugins from './plugins';
+import type { VideoPlayer } from './shared/schema/player';
+import { SOURCES_MIME_TYPES } from './shared/settings';
+import { createSrcVideoAdaptive } from './shared/url/createSrcVideoAdaptive';
 
 for (const [name, plugin] of Object.entries(plugins)) {
   videojs.registerPlugin(name, plugin);
 }
 
-export class UCVideo extends HTMLElement {
-  #player: VideoPlayer | null = null;
-  #options?: Options;
-  #videoEl: HTMLVideoElement | null = null;
-
-  static get observedAttributes() {
-    return Object.keys(LIST_ATTRIBUTES);
-  }
+class BaseVideoComponent extends HTMLElement {
+  static observedAttributes = arrayAttrKeys;
+  protected _videoEl?: HTMLVideoElement;
+  protected _player: any;
+  protected _options = videojs.obj.merge(initConfiguration);
 
   connectedCallback() {
-    this.clear();
+    this.destroy();
 
-    this.#options = videojs.obj.merge(
-      mergeOptions(this.attributes, LIST_ATTRIBUTES),
-      DEFAULT_HLS_OPTIONS
-    );
-
-    this.#renderElVideo().then((videoEl) => this.#initPlayer(videoEl));
-  }
-
-  clear() {
-    if (this.#player) {
-      this.#player.dispose();
-      this.#player = null;
+    for (const key of allKeysConfiguration) {
+      Object.defineProperty(this, key, {
+        get: () => this._getValue(key),
+        set: (value) => this._setValue(key, value),
+      });
     }
-    this.innerHTML = "";
+
+    this.render();
   }
 
   disconnectedCallback() {
-    this.clear();
+    this.destroy();
   }
 
-  attributeChangedCallback() {}
+  connectedMoveCallback() {}
 
-  #initPlayer(videoEl: HTMLVideoElement) {
-    if (!this.#player && videoEl) {
-      this.#player = videojs(videoEl, this.#options) as VideoPlayer;
+  adoptedCallback() {}
 
-      this.#calcSrc();
-      this.#initPlugins();
+  attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+    if (oldValue === newValue) return;
+
+    const key = attrKeyMapping[name];
+    this._options[key] = newValue;
+  }
+
+  _setValue(key: string, value: unknown) {
+    try {
+      if (this._options[key] === value) return;
+
+      this._options[key] = value;
+
+      if (this._player[key]) {
+        this._player[key](value);
+      }
+    } catch (error) {
+      console.error(`The value for ${key} is not supported:`, error);
     }
   }
 
-  #renderElVideo() {
-    return new Promise<HTMLVideoElement>((resolve) => {
-      this.#videoEl = document.createElement("video");
-      this.#videoEl.classList.add("video-js");
-
-      this.appendChild(this.#videoEl);
-      resolve(this.#videoEl);
-    });
+  _getValue(key: string) {
+    return this._options[key];
   }
 
-  #initPlugins() {
-    this.#initQualityHls();
-    this.#initGeneratePoster();
-    this.#initLogo();
+  _createVideoElement() {
+    const videoEl = document.createElement('video');
+    videoEl.classList.add('video-js');
+    this._videoEl = videoEl;
+    this.appendChild(videoEl);
   }
 
-  /**
-   * @private
-   * @description Initialize the HLS quality selector plugin
-   */
-  #initQualityHls() {
-    this.#player?.httpSourceSelector({ default: "auto" });
+  render() {
+    this._createVideoElement();
+    this._initVideoJS();
   }
 
-  /**
-   * @private
-   * @description Initialize the poster generation plugin
-   */
-  #initGeneratePoster() {
-    this.#player?.generatePoster({
-      videoEl: this.#videoEl,
-      posterOffset: this.#options?.posterOffset,
-      crossOrigin: this.#options?.crossorigin,
-    });
+  destroy() {
+    this._player?.dispose();
+    this._player = null;
+    this.innerHTML = '';
   }
 
-  #initLogo() {
-    if (!this.#options?.showLogo) return;
-
-    this.#player?.addLogo();
-  }
-
-  #calcSrc() {
-    if (!this.#options?.uuid) {
-      throw new Error("Add a uuid");
+  _initVideoJS() {
+    if (!this._videoEl) {
+      throw new Error('Video element already initialized.');
     }
 
-    const src = createSrcVideoAdaptive(
-      this.#options?.cdnCname || DEFAULT_CDN_CNAME,
-      this.#options?.uuid
-    );
+    this._player = videojs(this._videoEl, this._options);
+  }
 
-    this.#player?.src({
-      src,
-      type: SOURCES_MIME_TYPES.hls,
-    });
+  get player(): VideoPlayer {
+    if (!this._player) {
+      throw new Error('Video player is not initialized.');
+    }
+    return this._player;
   }
 }
 
-if (!customElements.get("uc-video")) {
-  customElements.define("uc-video", UCVideo);
+export class VideoComponent extends BaseVideoComponent {
+  constructor() {
+    super();
+  }
+
+  _initVideoJS() {
+    super._initVideoJS();
+    this._initPlugins();
+    this._calculateSrcUrl();
+  }
+
+  _initPlugins() {
+    this._initQualityHls();
+    this._initGeneratePoster();
+    this._initLogo();
+  }
+
+  _initQualityHls() {
+    this._player?.httpSourceSelector({ default: 'auto' });
+  }
+
+  _calculateSrcUrl() {
+    if (!this._options.uuid) {
+      throw new Error('UUID is required to calculate the video source URL.');
+    }
+
+    this._player?.src({
+      src: createSrcVideoAdaptive(this._options?.cdnCname, this._options?.uuid),
+      type: SOURCES_MIME_TYPES.hls,
+    });
+  }
+
+  _initGeneratePoster() {
+    this._player?.generatePoster({
+      videoEl: this._videoEl,
+      posterOffset: this._options?.posterOffset,
+      crossOrigin: this._options?.crossorigin,
+    });
+  }
+
+  _initLogo() {
+    if (!this._options?.showLogo) return;
+
+    this._player?.showLogo();
+  }
+}
+
+export class UCVideo extends VideoComponent {}
+
+if (!customElements.get('uc-video')) {
+  customElements.define('uc-video', UCVideo);
 }

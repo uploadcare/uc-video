@@ -1,1 +1,1 @@
-export { HttpSourceSelector } from './httpSourceSelector'
+export { HttpSourceSelector } from './httpSourceSelector';

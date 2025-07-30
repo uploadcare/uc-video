@@ -1,6 +1,6 @@
 {
   "name": "@uploadcare/uc-video",
-  "version": "0.3.5",
+  "version": "0.4.0-alpha.1",
   "description": "Uploadcare's UCVideo solution for adaptive bitrate streaming",
   "keywords": [
     "uploadcare",
@@ -18,38 +18,48 @@
     "README.md",
     "LICENSE"
   ],
-  "sideEffects": [
-    "*.css"
-  ],
+  "sideEffects": true,
   "type": "module",
-  "main": "./dist/uc-video.umd.cjs",
-  "module": "./dist/uc-video.js",
+  "main": "./dist/uc-video.umd.js",
+  "module": "./dist/uc-video.es.js",
+  "types": "./dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/uc-video.js",
-      "require": "./dist/uc-video.umd.cjs"
+      "types": "./dist/index.d.ts",
+      "browser": "./dist/uc-video.es.js",
+      "import": "./dist/uc-video.es.js",
+      "require": "./dist/uc-video.umd.js"
     },
-    "./style": "./dist/style.css",
+    "./style": "./dist/uc-video.css",
+    "./style.css": "./dist/uc-video.css",
     "./types/jsx": "./src/libs/types/jsx.d.ts",
     "./env": "./env.js"
   },
   "scripts": {
     "dev": "vite build --watch",
-    "build": "tsc && npm run build:types && vite build",
+    "build": "tsc && vite build",
     "build:types": "tsc --project tsconfig.types.json",
     "tsc": "tsc --project tsconfig.json",
     "preview": "vite preview",
+    "lint": "biome check",
+    "format": "biome format",
     "release": "shipjs prepare",
-    "prepare": "husky install"
+    "prepare": "husky install",
+    "clean:dist": "rimraf -g './dist'",
+    "clean:types": "rimraf -g './src/libs/**/*.d.ts' && rimraf -g './src/libs/**/*.d.ts.map'",
+    "clean": "run-s clean:*",
+    "test": "vitest",
+    "test:coverage": "vitest run --coverage"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.9.3",
+    "@biomejs/biome": "2.0.6",
     "husky": "^8.0.3",
     "lint-staged": "^15.4.3",
     "shipjs": "0.27.0",
     "typescript": "^5.5.3",
     "video.js": "^8.17.4",
-    "vite": "^5.4.1"
+    "vite": "^7.0.0",
+    "vitest": "^3.2.4"
   },
   "peerDependencies": {
     "video.js": "^8"
@@ -75,6 +85,6 @@
   "dependencies": {
     "npm-run-all": "^4.1.5",
     "rimraf": "^6.0.1",
-    "vite-plugin-dts": "^4.2.4"
+    "vite-plugin-dts": "^4.5.4"
   }
 }

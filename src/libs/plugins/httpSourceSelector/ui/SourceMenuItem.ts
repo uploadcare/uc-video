@@ -1,8 +1,9 @@
-import videojs from "video.js";
-import type Player from "video.js/dist/types/player";
-import type { TOptions } from "../../../shared/settings";
-const MenuItem = videojs.getComponent("MenuItem");
-const Component = videojs.getComponent("Component");
+import videojs from 'video.js';
+import type Player from 'video.js/dist/types/player';
+import type { TOptions } from '../../../shared/settings';
+
+const MenuItem = videojs.getComponent('MenuItem');
+const Component = videojs.getComponent('Component');
 
 class SourceMenuItem extends MenuItem {
   constructor(player: Player, options: TOptions) {
@@ -33,5 +34,5 @@ class SourceMenuItem extends MenuItem {
   }
 }
 // @ts-ignore
-Component.registerComponent("SourceMenuItem", SourceMenuItem);
+Component.registerComponent('SourceMenuItem', SourceMenuItem);
 export default SourceMenuItem;

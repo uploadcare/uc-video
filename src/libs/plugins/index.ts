@@ -1,6 +1,6 @@
-import { GeneratePoster } from "./generatePoster";
-import { Logo } from "./logo";
-import { HttpSourceSelector } from "./httpSourceSelector";
+import { GeneratePoster } from './generatePoster';
+import { HttpSourceSelector } from './httpSourceSelector';
+import { Logo } from './logo';
 
 const plugins = {
   GeneratePoster,

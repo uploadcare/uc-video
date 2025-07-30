@@ -4,7 +4,7 @@
   background-repeat: no-repeat;
   background-position: center;
 
-  transition: transform .3s ease;
+  transition: transform 0.3s ease;
 }
 
 .vjs-uc-logo:hover {
