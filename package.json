@@ -1,6 +1,6 @@
 {
   "name": "@uploadcare/uc-video",
-  "version": "0.4.0-alpha.1",
+  "version": "0.3.5",
   "description": "Uploadcare's UCVideo solution for adaptive bitrate streaming",
   "keywords": [
     "uploadcare",
@@ -21,13 +21,13 @@
   "sideEffects": true,
   "type": "module",
   "main": "./dist/uc-video.umd.js",
-  "module": "./dist/uc-video.es.js",
+  "module": "./dist/uc-video.js",
   "types": "./dist/index.d.ts",
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "browser": "./dist/uc-video.es.js",
-      "import": "./dist/uc-video.es.js",
+      "browser": "./dist/uc-video.js",
+      "import": "./dist/uc-video.js",
       "require": "./dist/uc-video.umd.js"
     },
     "./style": "./dist/uc-video.css",

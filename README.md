@@ -9,8 +9,8 @@
 </p>
 <p align="center">
   <a href="https://uploadcare.com/cdn/video-cdn/?utm_source=npm&utm_medium=ucvideo&utm_campaign=video_cdn&utm_content=website_header">Website</a> •
-  <a href="https://uploadcare.com/docs/adaptive-bitrate-streaming/?utm_source=npm&utm_medium=ucvideo&utm_campaign=video_cdn&utm_content=docs_header">Docs</a> • 
-  <a href="https://uploadcare.com/blog/?utm_source=npm&utm_medium=ucvideo&utm_campaign=video_cdn&utm_content=blog_header">Blog</a> • 
+  <a href="https://uploadcare.com/docs/adaptive-bitrate-streaming/?utm_source=npm&utm_medium=ucvideo&utm_campaign=video_cdn&utm_content=docs_header">Docs</a> •
+  <a href="https://uploadcare.com/blog/?utm_source=npm&utm_medium=ucvideo&utm_campaign=video_cdn&utm_content=blog_header">Blog</a> •
   <a href="https://discord.gg/mKWRgRsVz8?ref=uc-video">Discord</a> •
   <a href="https://twitter.com/Uploadcare?ref=uc-video">Twitter</a>
 </p>
