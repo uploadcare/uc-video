@@ -15,8 +15,7 @@ export default defineConfig({
         index: resolve(__dirname, "src/libs/index.ts"),
       },
       name: "uc-video",
-      formats: ["es", "umd"],
-      fileName: (format) => `uc-video.${format}.js`,
+      fileName: "uc-video",
     },
     rollupOptions: {
       treeshake: "smallest",
