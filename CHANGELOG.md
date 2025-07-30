@@ -1,3 +1,12 @@
+## [0.3.6](https://github.com/uploadcare/uc-video/compare/v0.3.5...v0.3.6) (2025-07-30)
+
+
+### Bug Fixes
+
+* added cleaning custom el before on mount ([#36](https://github.com/uploadcare/uc-video/issues/36)) ([286baea](https://github.com/uploadcare/uc-video/commit/286baea15d89bd291ab3af5d8b4d76232e74bd22))
+
+
+
 ## [0.3.5](https://github.com/uploadcare/uc-video/compare/v0.3.4...v0.3.5) (2025-04-14)
 
 ## [0.3.4](https://github.com/uploadcare/uc-video/compare/v0.3.3...v0.3.4) (2025-04-08)
