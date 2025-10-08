@@ -1,11 +1,13 @@
 import videojs from "video.js";
-import videojsStyles from "video.js/dist/video-js.css?inline";
+import "video.js/dist/video-js.css";
 import "./base.css";
 import {
   allKeysConfiguration,
   arrayAttrKeys,
   attrKeyMapping,
-  initConfiguration,
+  initialConfiguration,
+  plainConfigKeys,
+  toKebabCase,
 } from "./configuration";
 import plugins from "./plugins";
 import type { VideoPlayer } from "./shared/schema/player";
@@ -19,23 +21,37 @@ for (const [name, plugin] of Object.entries(plugins)) {
 class BaseVideoComponent extends HTMLElement {
   static observedAttributes = arrayAttrKeys;
   protected _videoEl?: HTMLVideoElement;
-  protected _player: any;
-  protected _options = videojs.obj.merge(initConfiguration);
-  protected _shadowRoot!: ShadowRoot;
+  protected _player;
+  protected _options = Object.assign({}, initialConfiguration);
+
+  protected _listeners = new Map();
+  protected _initialized = false;
+  protected _isReady = false;
 
   constructor() {
     super();
-    this._shadowRoot = this.attachShadow({ mode: "open" });
   }
 
   connectedCallback() {
-    this.destroy();
+    const anyThis = this as any;
 
     for (const key of allKeysConfiguration) {
-      Object.defineProperty(this, key, {
-        get: () => this._getValue(key),
-        set: (value) => this._setValue(key, value),
-      });
+      const initialValue = anyThis._options[key];
+
+      if (initialValue !== initialConfiguration[key]) {
+        this._setValue(key, initialValue);
+      }
+
+      if (!this.hasOwnProperty(key)) {
+        Object.defineProperty(this, key, {
+          get: () => this._getValue(key),
+          set: (value) => this._setValue(key, value),
+        });
+      }
+    }
+
+    for (const [event, handlers] of this._listeners) {
+      handlers.forEach((cb: () => void) => this._player.on(event, cb));
     }
 
     this.render();
@@ -45,46 +61,102 @@ class BaseVideoComponent extends HTMLElement {
     this.destroy();
   }
 
-  connectedMoveCallback() {}
-
-  adoptedCallback() {}
-
   attributeChangedCallback(name: string, oldValue: string, newValue: string) {
     if (oldValue === newValue) return;
 
     const key = attrKeyMapping[name];
-    this._options[key] = newValue;
+    this._setValue(key, newValue);
   }
 
   loadDependencies() {}
 
-  _loadStyles() {}
-
-  _loadFonts() {}
-
-  _setValue(key: string, value: unknown) {
-    try {
-      if (this._options[key] === value) return;
-
-      this._options[key] = value;
-
-      if (this._player[key]) {
-        this._player[key](value);
+  _flushValueToAttribute(
+    key: keyof typeof initialConfiguration,
+    value: unknown
+  ) {
+    if (plainConfigKeys.includes(key)) {
+      const attrs = [...new Set([toKebabCase(key), key.toLowerCase()])];
+      for (const attr of attrs) {
+        if (typeof value === "undefined" || value === null) {
+          this.removeAttribute(attr as string);
+        } else if (this.getAttribute(attr as string) !== value.toString()) {
+          this.setAttribute(attr as string, value.toString());
+        }
       }
-    } catch (error) {
-      console.error(`The value for ${key} is not supported:`, error);
     }
   }
 
+  _flushValueToState(key: keyof typeof initialConfiguration, value: unknown) {
+    if (this._options[key] !== value) {
+      if (typeof value === "undefined" || value === null) {
+        this._options[key] = initialConfiguration[key];
+      } else {
+        this._options[key] = value;
+      }
+    }
+  }
+
+  _normalizeConfigValue(
+    key: keyof typeof initialConfiguration,
+    value: unknown
+  ) {
+    if (typeof value === "undefined" || value === null) {
+      return undefined;
+    }
+
+    try {
+      if (typeof initialConfiguration[key] === "boolean") {
+        if (typeof value === "undefined" || value === null) return false;
+        if (typeof value === "boolean") return value;
+        if (value === "true") return true;
+        if (value === "") return true;
+        if (value === "false") return false;
+      } else if (typeof initialConfiguration[key] === "number") {
+        if (typeof value === "string") {
+          const parsedValue = parseFloat(value);
+          if (!isNaN(parsedValue)) {
+            return parsedValue;
+          }
+        }
+      } else if (typeof initialConfiguration[key] === "string") {
+        if (typeof value === "string") {
+          return value;
+        }
+      } else if (typeof initialConfiguration[key] === "object") {
+        if (typeof value === "object") {
+          return value;
+        }
+      }
+      return value;
+    } catch (error) {
+      console.error(`Error normalizing config value for key ${key}:`, error);
+      return initialConfiguration[key];
+    }
+  }
+
+  _setValue(key: keyof typeof initialConfiguration, value: unknown) {
+    const anyThis = this;
+    const normalizedValue = this._normalizeConfigValue(key, value);
+    if (anyThis._options[key] === normalizedValue) return;
+
+    anyThis._options[key] = normalizedValue;
+
+    this._flushValueToAttribute(key, normalizedValue);
+    this._flushValueToState(key, normalizedValue);
+
+    this._player?.[key](normalizedValue);
+  }
+
   _getValue(key: string) {
-    return this._options[key];
+    const anyThis = this;
+    return anyThis._options[key];
   }
 
   _createVideoElement() {
     const videoEl = document.createElement("video");
     videoEl.classList.add("video-js");
     this._videoEl = videoEl;
-    this._shadowRoot.appendChild(videoEl);
+    this.appendChild(videoEl);
   }
 
   render() {
@@ -93,8 +165,9 @@ class BaseVideoComponent extends HTMLElement {
   }
 
   destroy() {
+    this._listeners.clear();
     this._player?.dispose();
-    this._player = null;
+    this._player = null!;
     this.innerHTML = "";
   }
 
@@ -103,7 +176,17 @@ class BaseVideoComponent extends HTMLElement {
       throw new Error("Video element already initialized.");
     }
 
-    this._player = videojs(this._videoEl, this._options);
+    this._player = videojs(this._videoEl, this._options, () => {
+      this._isReady = true;
+    });
+    this._initialized = true;
+  }
+
+  updateSource(uuid: string) {
+    this._player?.src({
+      src: createSrcVideoAdaptive(this._options?.cdnCname, uuid),
+      type: SOURCES_MIME_TYPES.hls,
+    });
   }
 
   get player(): VideoPlayer {
@@ -112,17 +195,63 @@ class BaseVideoComponent extends HTMLElement {
     }
     return this._player;
   }
+
+  get isReady(): boolean {
+    return (
+      this._isReady && this._initialized && this._player?.readyState() >= 1
+    );
+  }
+
+  ready(callback?: () => void): Promise<void> | this {
+    if (callback) {
+      if (this.isReady) {
+        callback();
+      } else {
+        this.player.ready(callback);
+      }
+      return this;
+    }
+
+    return new Promise((resolve) => {
+      if (this.isReady) {
+        resolve();
+      } else {
+        this.player.ready(() => {
+          this._isReady = true;
+          void resolve();
+        });
+      }
+    });
+  }
+
+  on(event: string, callback: () => void) {
+    if (!this._listeners.has(event)) {
+      this._listeners.set(event, new Set());
+    }
+    this._listeners.get(event).add(callback);
+
+    if (this._initialized) {
+      this.player.on(event, callback);
+    }
+    return this;
+  }
+
+  off(event: string, callback: () => void) {
+    if (this._listeners.has(event)) {
+      this._listeners.get(event).delete(callback);
+    }
+    if (this._initialized) {
+      this.player.off(event, callback);
+    }
+    return this;
+  }
 }
 
 export class VideoComponent extends BaseVideoComponent {
-  constructor() {
-    super();
-  }
-
   _initVideoJS() {
     super._initVideoJS();
     this._initPlugins();
-    // this._calculateSrcUrl();
+    this._calculateSrcUrl();
   }
 
   _initPlugins() {
@@ -136,13 +265,9 @@ export class VideoComponent extends BaseVideoComponent {
   }
 
   _calculateSrcUrl() {
-    if (!this._options.uuid) {
-      throw new Error("UUID is required to calculate the video source URL.");
-    }
-
-    this._player?.src({
-      src: createSrcVideoAdaptive(this._options?.cdnCname, this._options?.uuid),
-      type: SOURCES_MIME_TYPES.hls,
+    this._player?.UUIDSourceInstance({
+      uuid: this._options.uuid,
+      cdnCname: this._options.cdnCname,
     });
   }
 
@@ -155,9 +280,9 @@ export class VideoComponent extends BaseVideoComponent {
   }
 
   _initLogo() {
-    if (!this._options?.showLogo) return;
-
-    this._player?.showLogo();
+    this._player?.LogoInstance({
+      active: this._options?.showLogo,
+    });
   }
 }
 

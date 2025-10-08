@@ -1,29 +1,46 @@
-import videojs from 'video.js';
-import type Player from 'video.js/dist/types/player';
-import { type TOptions, VIDEO_PLAYER_EVENTS } from '../../shared/settings';
-import { Logo as LogoComponent } from '../../shared/ui/index';
-import { BasePlugin } from '../BasePlugin';
+import videojs from "video.js";
+import "./logo.css";
+import { metricaAnalytics } from "../../shared/analytics";
 
-export class Logo extends BasePlugin {
-  constructor(player: Player, options: TOptions) {
-    videojs.registerComponent('UCLogo', LogoComponent);
+const defaults = {
+  active: true,
+};
 
+const Plugin = videojs.getPlugin("plugin");
+
+export class Logo extends Plugin {
+  protected player;
+  protected logoEl;
+  protected state;
+  protected options_;
+
+  constructor(player, options = {}) {
     super(player, options);
+    this.player = player;
 
-    this._player.on(VIDEO_PLAYER_EVENTS.READY, () => {
-      this._init();
-    });
+    this.options_ = Object.assign({}, defaults, options);
+
+    this.state = {
+      showLogo: this.options_.active,
+    };
+
+    this.logoEl = document.createElement("a");
+    this.logoEl.href = metricaAnalytics.LOGO;
+    this.logoEl.target = "_blank";
+    this.logoEl.className = "vjs-control vjs-uc-logo vjs-button";
+
+    this._setVisibility(this.state.showLogo);
+
+    const controlBar = this.player.controlBar;
+    controlBar.el().appendChild(this.logoEl);
+
+    this.player.showLogo = (value: boolean) => this._setVisibility(value);
   }
 
-  _init() {
-    // @ts-ignore
-    const controlBar = this._player.controlBar;
-    if (!controlBar.getChild('UCLogo')) {
-      controlBar.el().append(controlBar.addChild('UCLogo').el());
-    }
+  _setVisibility(show: boolean) {
+    this.state.showLogo = show;
+    this.logoEl.style.display = show ? "block" : "none";
   }
 }
 
-const registerPlugin = videojs.registerPlugin;
-
-registerPlugin('showLogo', Logo);
+videojs.registerPlugin("LogoInstance", Logo);

@@ -1,7 +1,7 @@
-import videojs from 'video.js';
-import type Player from 'video.js/dist/types/player';
+import videojs from "video.js";
+import type Player from "video.js/dist/types/player";
 
-const Plugin = videojs.getPlugin('plugin');
+const Plugin = videojs.getPlugin("plugin");
 
 // @ts-ignore
 export class BasePlugin<T extends Player = Player> extends Plugin {
