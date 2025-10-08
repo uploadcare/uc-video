@@ -1,6 +1,6 @@
 {
   "name": "@uploadcare/uc-video",
-  "version": "0.3.6",
+  "version": "0.3.7-alpha.1",
   "description": "Uploadcare's UCVideo solution for adaptive bitrate streaming",
   "keywords": [
     "uploadcare",
@@ -36,13 +36,14 @@
     "./env": "./env.js"
   },
   "scripts": {
+    "dev:client": "vite ",
     "dev": "vite build --watch",
     "build": "tsc && vite build",
     "build:types": "tsc --project tsconfig.types.json",
     "tsc": "tsc --project tsconfig.json",
     "preview": "vite preview",
     "lint": "biome check",
-    "format": "biome format",
+    "format": "biome format --write ./src",
     "release": "shipjs prepare",
     "prepare": "husky install",
     "clean:dist": "rimraf -g './dist'",

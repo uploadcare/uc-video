@@ -1,16 +1,16 @@
-import videojs from 'video.js';
-import 'video.js/dist/video-js.css';
-import './base.css';
+import videojs from "video.js";
+import videojsStyles from "video.js/dist/video-js.css?inline";
+import "./base.css";
 import {
   allKeysConfiguration,
   arrayAttrKeys,
   attrKeyMapping,
   initConfiguration,
-} from './configuration';
-import plugins from './plugins';
-import type { VideoPlayer } from './shared/schema/player';
-import { SOURCES_MIME_TYPES } from './shared/settings';
-import { createSrcVideoAdaptive } from './shared/url/createSrcVideoAdaptive';
+} from "./configuration";
+import plugins from "./plugins";
+import type { VideoPlayer } from "./shared/schema/player";
+import { SOURCES_MIME_TYPES } from "./shared/settings";
+import { createSrcVideoAdaptive } from "./shared/url/createSrcVideoAdaptive";
 
 for (const [name, plugin] of Object.entries(plugins)) {
   videojs.registerPlugin(name, plugin);
@@ -21,6 +21,12 @@ class BaseVideoComponent extends HTMLElement {
   protected _videoEl?: HTMLVideoElement;
   protected _player: any;
   protected _options = videojs.obj.merge(initConfiguration);
+  protected _shadowRoot!: ShadowRoot;
+
+  constructor() {
+    super();
+    this._shadowRoot = this.attachShadow({ mode: "open" });
+  }
 
   connectedCallback() {
     this.destroy();
@@ -50,6 +56,12 @@ class BaseVideoComponent extends HTMLElement {
     this._options[key] = newValue;
   }
 
+  loadDependencies() {}
+
+  _loadStyles() {}
+
+  _loadFonts() {}
+
   _setValue(key: string, value: unknown) {
     try {
       if (this._options[key] === value) return;
@@ -69,10 +81,10 @@ class BaseVideoComponent extends HTMLElement {
   }
 
   _createVideoElement() {
-    const videoEl = document.createElement('video');
-    videoEl.classList.add('video-js');
+    const videoEl = document.createElement("video");
+    videoEl.classList.add("video-js");
     this._videoEl = videoEl;
-    this.appendChild(videoEl);
+    this._shadowRoot.appendChild(videoEl);
   }
 
   render() {
@@ -83,12 +95,12 @@ class BaseVideoComponent extends HTMLElement {
   destroy() {
     this._player?.dispose();
     this._player = null;
-    this.innerHTML = '';
+    this.innerHTML = "";
   }
 
   _initVideoJS() {
     if (!this._videoEl) {
-      throw new Error('Video element already initialized.');
+      throw new Error("Video element already initialized.");
     }
 
     this._player = videojs(this._videoEl, this._options);
@@ -96,7 +108,7 @@ class BaseVideoComponent extends HTMLElement {
 
   get player(): VideoPlayer {
     if (!this._player) {
-      throw new Error('Video player is not initialized.');
+      throw new Error("Video player is not initialized.");
     }
     return this._player;
   }
@@ -110,7 +122,7 @@ export class VideoComponent extends BaseVideoComponent {
   _initVideoJS() {
     super._initVideoJS();
     this._initPlugins();
-    this._calculateSrcUrl();
+    // this._calculateSrcUrl();
   }
 
   _initPlugins() {
@@ -120,12 +132,12 @@ export class VideoComponent extends BaseVideoComponent {
   }
 
   _initQualityHls() {
-    this._player?.httpSourceSelector({ default: 'auto' });
+    this._player?.httpSourceSelector({ default: "auto" });
   }
 
   _calculateSrcUrl() {
     if (!this._options.uuid) {
-      throw new Error('UUID is required to calculate the video source URL.');
+      throw new Error("UUID is required to calculate the video source URL.");
     }
 
     this._player?.src({
@@ -151,6 +163,6 @@ export class VideoComponent extends BaseVideoComponent {
 
 export class UCVideo extends VideoComponent {}
 
-if (!customElements.get('uc-video')) {
-  customElements.define('uc-video', UCVideo);
+if (!customElements.get("uc-video")) {
+  customElements.define("uc-video", UCVideo);
 }
