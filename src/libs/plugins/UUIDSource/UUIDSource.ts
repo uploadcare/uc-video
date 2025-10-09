@@ -9,7 +9,7 @@ export class UUIDSource extends Plugin {
   protected uuid;
   protected cdnCname;
 
-  constructor(player, options = {}) {
+  constructor(player, options: { uuid: string; cdnCname: string }) {
     super(player, options);
 
     this.uuid = options.uuid;

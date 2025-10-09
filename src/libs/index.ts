@@ -1,5 +1,5 @@
 import videojs from "video.js";
-
+import "video.js/dist/video-js.css";
 import baseStyles from "./base.css?url";
 
 import {
@@ -21,21 +21,25 @@ class BaseVideoComponent extends HTMLElement {
   static observedAttributes = arrayAttrKeys;
   protected _videoEl?: HTMLVideoElement;
   protected _player;
+
+  protected _shadowRoot!: ShadowRoot;
+
   protected _options = Object.assign({}, initialConfiguration);
 
   protected _listeners = new Map();
+
   protected _initialized = false;
   protected _isReady = false;
-
-  protected _shadowRoot!: ShadowRoot;
+  protected _videojsFontFaceInjected = false;
 
   constructor() {
     super();
 
-    this._shadowRoot = this.attachShadow({ mode: "open" });
+    // this._shadowRoot = this.attachShadow({ mode: "open" });
   }
 
   connectedCallback() {
+    this.destroy();
     const anyThis = this as any;
 
     for (const key of allKeysConfiguration) {
@@ -57,14 +61,14 @@ class BaseVideoComponent extends HTMLElement {
       handlers.forEach((cb: () => void) => this._player.on(event, cb));
     }
 
-    // Загружаем стили и только после этого рендерим видео
-    this.loadDependencies()
-      .then(() => {
-        this.render();
-      })
-      .catch((err) => {
-        console.error("Failed to load dependencies:", err);
-      });
+    this.render();
+    // this.loadDependencies()
+    //   .then(() => {
+    //     this.render();
+    //   })
+    //   .catch((err) => {
+    //     console.error("Failed to load dependencies:", err);
+    //   });
   }
 
   disconnectedCallback() {
@@ -82,8 +86,11 @@ class BaseVideoComponent extends HTMLElement {
     this._listeners.clear();
     this._player?.dispose();
     this._player = null!;
+    this._isReady = false;
+    this._initialized = false;
     this._videoEl = null!;
-    this._shadowRoot.innerHTML = "";
+    this.innerHTML = "";
+    // this._shadowRoot.innerHTML = "";
   }
 
   render() {
@@ -109,7 +116,30 @@ class BaseVideoComponent extends HTMLElement {
           this._shadowRoot.appendChild(link);
         })
     );
+
+    this._injectGlobalFonts();
+
     return Promise.all(promises);
+  }
+
+  _injectGlobalFonts() {
+    const FONT_FACE = `
+    @font-face {
+      font-family: 'VideoJS';
+      src: url('https://vjs.zencdn.net/8.10.0/font/VideoJS.woff') format('woff'),
+           url('https://vjs.zencdn.net/8.10.0/font/VideoJS.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+  `;
+
+    if (!this._videojsFontFaceInjected) {
+      const globalFont = document.createElement("style");
+      globalFont.textContent = FONT_FACE;
+      document.head.appendChild(globalFont);
+      this._videojsFontFaceInjected = true;
+    }
+    return Promise.resolve();
   }
 
   _flushValueToAttribute(
@@ -198,7 +228,8 @@ class BaseVideoComponent extends HTMLElement {
     const videoEl = document.createElement("video");
     videoEl.classList.add("video-js");
     this._videoEl = videoEl;
-    this._shadowRoot.appendChild(videoEl);
+    this.appendChild(videoEl);
+    // this._shadowRoot.appendChild(videoEl);
   }
 
   _initVideoJS() {
