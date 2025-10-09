@@ -1,6 +1,7 @@
 import videojs from "video.js";
-import "video.js/dist/video-js.css";
-import "./base.css";
+
+import baseStyles from "./base.css?url";
+
 import {
   allKeysConfiguration,
   arrayAttrKeys,
@@ -11,8 +12,6 @@ import {
 } from "./configuration";
 import plugins from "./plugins";
 import type { VideoPlayer } from "./shared/schema/player";
-import { SOURCES_MIME_TYPES } from "./shared/settings";
-import { createSrcVideoAdaptive } from "./shared/url/createSrcVideoAdaptive";
 
 for (const [name, plugin] of Object.entries(plugins)) {
   videojs.registerPlugin(name, plugin);
@@ -28,8 +27,12 @@ class BaseVideoComponent extends HTMLElement {
   protected _initialized = false;
   protected _isReady = false;
 
+  protected _shadowRoot!: ShadowRoot;
+
   constructor() {
     super();
+
+    this._shadowRoot = this.attachShadow({ mode: "open" });
   }
 
   connectedCallback() {
@@ -54,7 +57,14 @@ class BaseVideoComponent extends HTMLElement {
       handlers.forEach((cb: () => void) => this._player.on(event, cb));
     }
 
-    this.render();
+    // Загружаем стили и только после этого рендерим видео
+    this.loadDependencies()
+      .then(() => {
+        this.render();
+      })
+      .catch((err) => {
+        console.error("Failed to load dependencies:", err);
+      });
   }
 
   disconnectedCallback() {
@@ -68,7 +78,39 @@ class BaseVideoComponent extends HTMLElement {
     this._setValue(key, newValue);
   }
 
-  loadDependencies() {}
+  destroy() {
+    this._listeners.clear();
+    this._player?.dispose();
+    this._player = null!;
+    this._videoEl = null!;
+    this._shadowRoot.innerHTML = "";
+  }
+
+  render() {
+    if (!this._videoEl) {
+      this._createVideoElement();
+      this._initVideoJS();
+    }
+  }
+
+  loadDependencies(): Promise<void[]> {
+    const styleURLs = [
+      "https://cdn.jsdelivr.net/npm/@uploadcare/uc-video@latest/dist/uc-video.min.css",
+      baseStyles,
+    ];
+    const promises = styleURLs.filter(Boolean).map(
+      (url) =>
+        new Promise<void>((resolve, reject) => {
+          const link = document.createElement("link");
+          link.rel = "stylesheet";
+          link.href = url;
+          link.onload = () => resolve();
+          link.onerror = (e) => reject(e);
+          this._shadowRoot.appendChild(link);
+        })
+    );
+    return Promise.all(promises);
+  }
 
   _flushValueToAttribute(
     key: keyof typeof initialConfiguration,
@@ -156,19 +198,7 @@ class BaseVideoComponent extends HTMLElement {
     const videoEl = document.createElement("video");
     videoEl.classList.add("video-js");
     this._videoEl = videoEl;
-    this.appendChild(videoEl);
-  }
-
-  render() {
-    this._createVideoElement();
-    this._initVideoJS();
-  }
-
-  destroy() {
-    this._listeners.clear();
-    this._player?.dispose();
-    this._player = null!;
-    this.innerHTML = "";
+    this._shadowRoot.appendChild(videoEl);
   }
 
   _initVideoJS() {
@@ -180,13 +210,6 @@ class BaseVideoComponent extends HTMLElement {
       this._isReady = true;
     });
     this._initialized = true;
-  }
-
-  updateSource(uuid: string) {
-    this._player?.src({
-      src: createSrcVideoAdaptive(this._options?.cdnCname, uuid),
-      type: SOURCES_MIME_TYPES.hls,
-    });
   }
 
   get player(): VideoPlayer {
