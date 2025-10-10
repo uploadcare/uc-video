@@ -216,7 +216,9 @@ class BaseVideoComponent extends HTMLElement {
     this._flushValueToAttribute(key, normalizedValue);
     this._flushValueToState(key, normalizedValue);
 
-    this._player?.[key](normalizedValue);
+    if (this._player?.[key]) {
+      this._player?.[key](normalizedValue);
+    }
   }
 
   _getValue(key: string) {
@@ -239,6 +241,8 @@ class BaseVideoComponent extends HTMLElement {
 
     this._player = videojs(this._videoEl, this._options, () => {
       this._isReady = true;
+
+      this.dispatchEvent(new CustomEvent("ready", { detail: this._player }));
     });
     this._initialized = true;
   }
@@ -315,7 +319,7 @@ export class VideoComponent extends BaseVideoComponent {
   }
 
   _initQualityHls() {
-    this._player?.httpSourceSelector({ default: "auto" });
+    this._player?.httpSourceSelector();
   }
 
   _calculateSrcUrl() {
