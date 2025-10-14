@@ -1,8 +1,8 @@
-import videojs from "video.js";
-import { createSrcVideoAdaptive } from "../../shared/url/createSrcVideoAdaptive";
-import { SOURCES_MIME_TYPES } from "../../shared/settings";
+import videojs from 'video.js';
+import { createSrcVideoAdaptive } from '../../shared/url/createSrcVideoAdaptive';
+import { SOURCES_MIME_TYPES } from '../../shared/settings';
 
-const Plugin = videojs.getPlugin("plugin");
+const Plugin = videojs.getPlugin('plugin');
 
 export class UUIDSource extends Plugin {
   protected player;
@@ -18,7 +18,7 @@ export class UUIDSource extends Plugin {
     this.player = player;
     this.player.ready(() => {
       if (!this.uuid) {
-        throw new Error("UUID is required");
+        throw new Error('UUID is required');
       }
 
       this.updateSource();
@@ -40,7 +40,7 @@ export class UUIDSource extends Plugin {
     const videoUrl = this.getVideoUrl(this.uuid);
 
     this.player.src({ src: videoUrl, type: SOURCES_MIME_TYPES.hls });
-    this.player.trigger("uuidchange", { uuid: this.uuid });
+    this.player.trigger('uuidchange', { uuid: this.uuid });
   }
 
   getVideoUrl(uuid: string) {
@@ -48,4 +48,4 @@ export class UUIDSource extends Plugin {
   }
 }
 
-videojs.registerPlugin("UUIDSourceInstance", UUIDSource);
+videojs.registerPlugin('UUIDSourceInstance', UUIDSource);

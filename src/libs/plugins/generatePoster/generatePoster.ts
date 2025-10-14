@@ -1,8 +1,8 @@
-import videojs from "video.js";
-import type Player from "video.js/dist/types/player";
-import { VIDEO_PLAYER_EVENTS } from "../../shared/settings";
-import "./poster.css";
-import { timeToSeconds } from "../../shared/utils/timeToSeconds";
+import videojs from 'video.js';
+import type Player from 'video.js/dist/types/player';
+import { VIDEO_PLAYER_EVENTS } from '../../shared/settings';
+import './poster.css';
+import { timeToSeconds } from '../../shared/utils/timeToSeconds';
 
 const INIT_TIME = 0;
 
@@ -10,7 +10,7 @@ const defaultOptions = {
   posterOffset: INIT_TIME,
 };
 
-const Plugin = videojs.getPlugin("plugin");
+const Plugin = videojs.getPlugin('plugin');
 
 export class GeneratePoster extends Plugin {
   protected player: Player;
@@ -23,8 +23,8 @@ export class GeneratePoster extends Plugin {
     options: {
       videoEl: HTMLVideoElement | null;
       posterOffset: string | number | undefined;
-      crossOrigin: "anonymous" | "use-credentials" | undefined;
-    }
+      crossOrigin: 'anonymous' | 'use-credentials' | undefined;
+    },
   ) {
     super(player, options);
 
@@ -67,26 +67,26 @@ export class GeneratePoster extends Plugin {
     // @ts-ignore
     if (this._posterOffset > duration) {
       console.warn(
-        `Capture time (${this._posterOffset}s) exceeds video duration (${duration}s). Using last frame.`
+        `Capture time (${this._posterOffset}s) exceeds video duration (${duration}s). Using last frame.`,
       );
     }
     try {
       const frameURL = await this._captureFrameAtTime();
       this.player.poster(frameURL as string); // Set the captured frame as the poster
     } catch (error) {
-      console.error("Error setting poster:", error);
+      console.error('Error setting poster:', error);
     }
   }
 
   _captureFrameAtTime() {
     return new Promise((resolve, reject) => {
-      const canvas = document.createElement("canvas");
-      const context = canvas.getContext("2d");
+      const canvas = document.createElement('canvas');
+      const context = canvas.getContext('2d');
       canvas.width = this._videoEl?.videoWidth || 0;
       canvas.height = this._videoEl?.videoHeight || 0;
 
       if (!context) {
-        reject("Failed to get canvas context");
+        reject('Failed to get canvas context');
         return;
       }
 
@@ -96,13 +96,13 @@ export class GeneratePoster extends Plugin {
           0,
           0,
           canvas.width,
-          canvas.height
+          canvas.height,
         );
-        const dataURL = canvas.toDataURL("image/jpeg");
+        const dataURL = canvas.toDataURL('image/jpeg');
         resolve(dataURL);
       } catch (error) {
         // @ts-ignore
-        reject("Failed to capture frame: " + error.message);
+        reject('Failed to capture frame: ' + error.message);
       } finally {
         this.player.currentTime(INIT_TIME);
       }
@@ -112,4 +112,4 @@ export class GeneratePoster extends Plugin {
 
 const registerPlugin = videojs.registerPlugin;
 
-registerPlugin("generatePoster", GeneratePoster);
+registerPlugin('generatePoster', GeneratePoster);

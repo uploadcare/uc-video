@@ -1,7 +1,7 @@
-import videojs from "video.js";
+import videojs from 'video.js';
 
-const MenuItem = videojs.getComponent("MenuItem");
-const Component = videojs.getComponent("Component");
+const MenuItem = videojs.getComponent('MenuItem');
+const Component = videojs.getComponent('Component');
 
 class SourceMenuItem extends MenuItem {
   protected item;
@@ -29,5 +29,5 @@ class SourceMenuItem extends MenuItem {
   }
 }
 // @ts-ignore
-Component.registerComponent("SourceMenuItem", SourceMenuItem);
+Component.registerComponent('SourceMenuItem', SourceMenuItem);
 export default SourceMenuItem;

@@ -1,12 +1,12 @@
-import videojs from "video.js";
-import "./logo.css";
-import { metricaAnalytics } from "../../shared/analytics";
+import videojs from 'video.js';
+import './logo.css';
+import { metricaAnalytics } from '../../shared/analytics';
 
 const defaults = {
   active: true,
 };
 
-const Plugin = videojs.getPlugin("plugin");
+const Plugin = videojs.getPlugin('plugin');
 
 export class Logo extends Plugin {
   protected player;
@@ -24,10 +24,10 @@ export class Logo extends Plugin {
       showLogo: this.options_.active,
     };
 
-    this.logoEl = document.createElement("a");
+    this.logoEl = document.createElement('a');
     this.logoEl.href = metricaAnalytics.LOGO;
-    this.logoEl.target = "_blank";
-    this.logoEl.className = "vjs-control vjs-uc-logo vjs-button";
+    this.logoEl.target = '_blank';
+    this.logoEl.className = 'vjs-control vjs-uc-logo vjs-button';
 
     this._setVisibility(this.state.showLogo);
 
@@ -39,8 +39,8 @@ export class Logo extends Plugin {
 
   _setVisibility(show: boolean) {
     this.state.showLogo = show;
-    this.logoEl.style.display = show ? "block" : "none";
+    this.logoEl.style.display = show ? 'block' : 'none';
   }
 }
 
-videojs.registerPlugin("LogoInstance", Logo);
+videojs.registerPlugin('LogoInstance', Logo);

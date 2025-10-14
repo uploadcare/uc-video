@@ -4,13 +4,13 @@
  *
  */
 
-import videojs from "video.js";
-import SourceMenuButton from "./ui/SourceMenuButton.js";
-import SourceMenuItem from "./ui/SourceMenuItem.js";
+import videojs from 'video.js';
+import SourceMenuButton from './ui/SourceMenuButton.js';
+import SourceMenuItem from './ui/SourceMenuItem.js';
 
 const defaults = {};
 
-const Plugin = videojs.getPlugin("plugin");
+const Plugin = videojs.getPlugin('plugin');
 
 export class HttpSourceSelector extends Plugin {
   private _qualityButton;
@@ -25,7 +25,7 @@ export class HttpSourceSelector extends Plugin {
 
     this.player.ready(() => {
       if (this.player.qualityLevels) {
-        this.player.addClass("vjs-hls-quality-selector");
+        this.player.addClass('vjs-hls-quality-selector');
 
         this.createQualityButton();
         this.bindPlayerEvents();
@@ -36,7 +36,7 @@ export class HttpSourceSelector extends Plugin {
   bindPlayerEvents() {
     this.player
       .qualityLevels()
-      .on("addqualitylevel", this.onAddQualityLevel.bind(this));
+      .on('addqualitylevel', this.onAddQualityLevel.bind(this));
   }
 
   createQualityButton() {
@@ -47,24 +47,24 @@ export class HttpSourceSelector extends Plugin {
     const placementIndex = player.controlBar.children().length - 2;
     const concreteButtonInstance = player.controlBar.addChild(
       this._qualityButton,
-      { componentClass: "qualitySelector" },
-      this.options.placementIndex || placementIndex
+      { componentClass: 'qualitySelector' },
+      this.options.placementIndex || placementIndex,
     );
 
-    concreteButtonInstance.addClass("vjs-quality-selector");
+    concreteButtonInstance.addClass('vjs-quality-selector');
     if (!this.options.displayCurrentQuality) {
-      const icon = ` ${this.options.vjsIconClass || "vjs-icon-hd"}`;
+      const icon = ` ${this.options.vjsIconClass || 'vjs-icon-hd'}`;
 
-      concreteButtonInstance.menuButton_.$(".vjs-icon-placeholder").className +=
+      concreteButtonInstance.menuButton_.$('.vjs-icon-placeholder').className +=
         icon;
     } else {
-      this.setButtonInnerText(player.localize("Auto"));
+      this.setButtonInnerText(player.localize('Auto'));
     }
-    concreteButtonInstance.removeClass("vjs-hidden");
+    concreteButtonInstance.removeClass('vjs-hidden');
   }
 
   setButtonInnerText(text) {
-    this._qualityButton.menuButton_.$(".vjs-icon-placeholder").innerHTML = text;
+    this._qualityButton.menuButton_.$('.vjs-icon-placeholder').innerHTML = text;
   }
 
   getQualityMenuItem(item) {
@@ -93,7 +93,7 @@ export class HttpSourceSelector extends Plugin {
         }).length
       ) {
         const levelItem = this.getQualityMenuItem.call(this, {
-          label: pixels + "p",
+          label: pixels + 'p',
           value: pixels,
         });
 
@@ -102,7 +102,7 @@ export class HttpSourceSelector extends Plugin {
     }
 
     levelItems.sort((current, next) => {
-      if (typeof current !== "object" || typeof next !== "object") {
+      if (typeof current !== 'object' || typeof next !== 'object') {
         return -1;
       }
       if (current.item.value > next.item.value) {
@@ -116,10 +116,10 @@ export class HttpSourceSelector extends Plugin {
 
     levelItems.push(
       this.getQualityMenuItem.call(this, {
-        label: this.player.localize("Auto"),
-        value: "auto",
+        label: this.player.localize('Auto'),
+        value: 'auto',
         selected: true,
-      })
+      }),
     );
 
     if (this._qualityButton) {
@@ -137,7 +137,7 @@ export class HttpSourceSelector extends Plugin {
 
     if (this.options.displayCurrentQuality) {
       this.setButtonInnerText(
-        quality === "auto" ? this.player.localize("Auto") : `${quality}p`
+        quality === 'auto' ? this.player.localize('Auto') : `${quality}p`,
       );
     }
 
@@ -145,16 +145,16 @@ export class HttpSourceSelector extends Plugin {
       const { width, height } = qualityList[i];
       const pixels = width > height ? height : width;
 
-      qualityList[i].enabled = pixels === quality || quality === "auto";
+      qualityList[i].enabled = pixels === quality || quality === 'auto';
     }
     this._qualityButton.unpressButton();
   }
 
   getCurrentQuality() {
-    return this._currentQuality || "auto";
+    return this._currentQuality || 'auto';
   }
 }
 
 const registerPlugin = videojs.registerPlugin;
 
-registerPlugin("httpSourceSelector", HttpSourceSelector);
+registerPlugin('httpSourceSelector', HttpSourceSelector);

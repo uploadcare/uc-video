@@ -1,5 +1,5 @@
 type VideoAttributes = {
-  autoplay: boolean | "muted" | "play" | "any";
+  autoplay: boolean | 'muted' | 'play' | 'any';
   controls: boolean;
 
   height: number | string;
@@ -8,10 +8,10 @@ type VideoAttributes = {
   loop: boolean;
   muted: boolean;
   poster: string | null;
-  preload: "none" | "metadata" | "auto";
+  preload: 'none' | 'metadata' | 'auto';
 
-  controlslist: "nodownload" | "nofullscreen" | "noremoteplayback";
-  crossorigin: "anonymous" | "use-credentials" | null;
+  controlslist: 'nodownload' | 'nofullscreen' | 'noremoteplayback';
+  crossorigin: 'anonymous' | 'use-credentials' | null;
   disablepictureinpicture: boolean;
   disableremoteplayback: boolean;
   playsinline: boolean;
@@ -30,7 +30,7 @@ type VideojsOptions = {
   audioPosterMode: boolean;
   autoSetup: boolean;
   breakpoints: Record<
-    "tiny" | "xsmall" | "small" | "medium" | "large" | "xlarge" | "huge",
+    'tiny' | 'xsmall' | 'small' | 'medium' | 'large' | 'xlarge' | 'huge',
     number
   > | null;
 
@@ -85,7 +85,7 @@ type VideojsOptions = {
   html5: unknown;
 };
 
-export const DEFAULT_CDN_CNAME = "https://ucarecdn.com";
+export const DEFAULT_CDN_CNAME = 'https://ucarecdn.com';
 
 export const DEFAULT_HLS_OPTIONS = {
   html5: {
@@ -104,13 +104,13 @@ export const DEFAULT_HLS_OPTIONS = {
 export const defaultVideoAttributes = {
   autoplay: false,
   controls: true,
-  height: "",
-  width: "",
+  height: '',
+  width: '',
   loop: false,
   muted: false,
   poster: null,
-  preload: "auto",
-  controlslist: "nodownload",
+  preload: 'auto',
+  controlslist: 'nodownload',
   crossorigin: null,
   disablepictureinpicture: false,
   disableremoteplayback: false,
@@ -118,10 +118,10 @@ export const defaultVideoAttributes = {
 } satisfies VideoAttributes;
 
 export const uploadcareConfiguration = {
-  uuid: "",
+  uuid: '',
   cdnCname: DEFAULT_CDN_CNAME,
   showLogo: true,
-  posterOffset: "",
+  posterOffset: '',
 } satisfies UploadcareVideoOptions;
 
 export const videojsOptions = {
@@ -134,13 +134,13 @@ export const videojsOptions = {
   enableSmoothSeeking: false,
   experimentalSvgIcons: false,
   fluid: false,
-  id: "",
+  id: '',
   inactivityTimeout: 0,
-  language: "",
+  language: '',
   liveui: false,
   nativeControlsForTouch: false,
   normalizeAutoplay: false,
-  notSupportedMessage: "",
+  notSupportedMessage: '',
   noUITitleAttributes: false,
   playbackRates: [],
   posterImage: true,
@@ -149,12 +149,12 @@ export const videojsOptions = {
   restoreEl: false,
   suppressNotSupportedError: false,
   techCanOverridePoster: false,
-  techOrder: ["html5"],
+  techOrder: ['html5'],
   sources: null,
 
   fullscreen: {
     options: {
-      navigationUI: "hide",
+      navigationUI: 'hide',
     },
   },
 
@@ -180,35 +180,35 @@ export const initialConfiguration = Object.freeze({
 export const allKeysConfiguration = Object.keys(initialConfiguration);
 
 export const complexConfigKeys = [
-  "breakpoints",
-  "children",
-  "fullscreen",
-  "restoreEl",
-  "sources",
-  "techOrder",
-  "spatialNavigation",
-  "html5",
+  'breakpoints',
+  'children',
+  'fullscreen',
+  'restoreEl',
+  'sources',
+  'techOrder',
+  'spatialNavigation',
+  'html5',
 ];
 
 const isComplexKey = (key: string) => complexConfigKeys.includes(key);
 
 export const plainConfigKeys =
   /** @type {(keyof import('../../types').ConfigPlainType)[]} */ allKeysConfiguration.filter(
-    (key) => !isComplexKey(key)
+    (key) => !isComplexKey(key),
   );
 
 export const toKebabCase = (str: string) =>
   str
     .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
     ?.map((x: string) => x.toLowerCase())
-    .join("-");
+    .join('-');
 
 export const attrKeyMapping = {
   ...Object.fromEntries(
-    allKeysConfiguration.map((key) => [toKebabCase(key), key])
+    allKeysConfiguration.map((key) => [toKebabCase(key), key]),
   ),
   ...Object.fromEntries(
-    allKeysConfiguration.map((key) => [key.toLowerCase(), key])
+    allKeysConfiguration.map((key) => [key.toLowerCase(), key]),
   ),
 };
 

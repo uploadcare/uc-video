@@ -1,11 +1,11 @@
-import videojs from "video.js";
+import videojs from 'video.js';
 
-const MenuButton = videojs.getComponent("MenuButton");
-const Menu = videojs.getComponent("Menu");
-const Component = videojs.getComponent("Component");
+const MenuButton = videojs.getComponent('MenuButton');
+const Menu = videojs.getComponent('Menu');
+const Component = videojs.getComponent('Component');
 
 const toTitleCase = (string: string) => {
-  if (typeof string !== "string") {
+  if (typeof string !== 'string') {
     return string;
   }
 
@@ -15,8 +15,8 @@ const toTitleCase = (string: string) => {
 class SourceMenuButton extends MenuButton {
   constructor(player) {
     super(player, {
-      title: player.localize("Quality"),
-      name: "QualityButton",
+      title: player.localize('Quality'),
+      name: 'QualityButton',
     });
   }
 
@@ -30,8 +30,8 @@ class SourceMenuButton extends MenuButton {
     this.hideThreshold_ = 0;
 
     if (this.options_.title) {
-      const titleEl = videojs.dom.createEl("li", {
-        className: "vjs-menu-title",
+      const titleEl = videojs.dom.createEl('li', {
+        className: 'vjs-menu-title',
         innerHTML: toTitleCase(this.options_.title),
         tabIndex: -1,
       });

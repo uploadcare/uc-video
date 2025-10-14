@@ -1,6 +1,6 @@
-import videojs from "video.js";
-import "video.js/dist/video-js.css";
-import baseStyles from "./base.css?url";
+import videojs from 'video.js';
+import 'video.js/dist/video-js.css';
+import baseStyles from './base.css?url';
 
 import {
   allKeysConfiguration,
@@ -9,10 +9,10 @@ import {
   initialConfiguration,
   plainConfigKeys,
   toKebabCase,
-} from "./configuration";
-import plugins from "./plugins";
-import type { VideoPlayer } from "./shared/schema/player";
-import { normalizeConfigValue } from "./shared/utils/normalizeConfigValue";
+} from './configuration';
+import plugins from './plugins';
+import type { VideoPlayer } from './shared/schema/player';
+import { normalizeConfigValue } from './shared/utils/normalizeConfigValue';
 
 for (const [name, plugin] of Object.entries(plugins)) {
   videojs.registerPlugin(name, plugin);
@@ -34,7 +34,7 @@ class BaseVideoComponent extends HTMLElement {
   constructor() {
     super();
 
-    this._shadowRoot = this.attachShadow({ mode: "open" });
+    this._shadowRoot = this.attachShadow({ mode: 'open' });
   }
 
   connectedCallback() {
@@ -65,7 +65,7 @@ class BaseVideoComponent extends HTMLElement {
         this.render();
       })
       .catch((err) => {
-        console.error("Failed to load dependencies:", err);
+        console.error('Failed to load dependencies:', err);
       });
   }
 
@@ -88,7 +88,7 @@ class BaseVideoComponent extends HTMLElement {
 
     this._player = null!;
     this._videoEl = null!;
-    this._shadowRoot.innerHTML = "";
+    this._shadowRoot.innerHTML = '';
   }
 
   render() {
@@ -100,19 +100,19 @@ class BaseVideoComponent extends HTMLElement {
 
   loadDependencies(): Promise<void[]> {
     const styleURLs = [
-      "https://cdn.jsdelivr.net/npm/@uploadcare/uc-video@latest/dist/uc-video.min.css",
+      'https://cdn.jsdelivr.net/npm/@uploadcare/uc-video@latest/dist/uc-video.min.css',
       baseStyles,
     ];
     const promises = styleURLs.filter(Boolean).map(
       (url) =>
         new Promise<void>((resolve, reject) => {
-          const link = document.createElement("link");
-          link.rel = "stylesheet";
+          const link = document.createElement('link');
+          link.rel = 'stylesheet';
           link.href = url;
           link.onload = () => resolve();
           link.onerror = (e) => reject(e);
           this._shadowRoot.appendChild(link);
-        })
+        }),
     );
 
     this._injectGlobalFonts();
@@ -132,7 +132,7 @@ class BaseVideoComponent extends HTMLElement {
   `;
 
     if (!this._videojsFontFaceInjected) {
-      const globalFont = document.createElement("style");
+      const globalFont = document.createElement('style');
       globalFont.textContent = FONT_FACE;
       document.head.appendChild(globalFont);
       this._videojsFontFaceInjected = true;
@@ -142,12 +142,12 @@ class BaseVideoComponent extends HTMLElement {
 
   _flushValueToAttribute(
     key: keyof typeof initialConfiguration,
-    value: unknown
+    value: unknown,
   ) {
     if (plainConfigKeys.includes(key)) {
       const attrs = [...new Set([toKebabCase(key), key.toLowerCase()])];
       for (const attr of attrs) {
-        if (typeof value === "undefined" || value === null) {
+        if (typeof value === 'undefined' || value === null) {
           this.removeAttribute(attr as string);
         } else if (this.getAttribute(attr as string) !== value.toString()) {
           this.setAttribute(attr as string, value.toString());
@@ -158,7 +158,7 @@ class BaseVideoComponent extends HTMLElement {
 
   _flushValueToState(key: keyof typeof initialConfiguration, value: unknown) {
     if (this._options[key] !== value) {
-      if (typeof value === "undefined" || value === null) {
+      if (typeof value === 'undefined' || value === null) {
         this._options[key] = initialConfiguration[key];
       } else {
         this._options[key] = value;
@@ -186,28 +186,28 @@ class BaseVideoComponent extends HTMLElement {
   }
 
   _createVideoElement() {
-    const videoEl = document.createElement("video");
-    videoEl.classList.add("video-js");
+    const videoEl = document.createElement('video');
+    videoEl.classList.add('video-js');
     this._videoEl = videoEl;
     this._shadowRoot.appendChild(videoEl);
   }
 
   _initVideoJS() {
     if (!this._videoEl) {
-      throw new Error("Video element already initialized.");
+      throw new Error('Video element already initialized.');
     }
 
     this._player = videojs(this._videoEl, this._options, () => {
       this._isReady = true;
 
-      this.dispatchEvent(new CustomEvent("ready", { detail: this._player }));
+      this.dispatchEvent(new CustomEvent('ready', { detail: this._player }));
     });
     this._initialized = true;
   }
 
   get player(): VideoPlayer {
     if (!this._player) {
-      throw new Error("Video player is not initialized.");
+      throw new Error('Video player is not initialized.');
     }
     return this._player;
   }
@@ -304,6 +304,6 @@ export class VideoComponent extends BaseVideoComponent {
 
 export class UCVideo extends VideoComponent {}
 
-if (!customElements.get("uc-video")) {
-  customElements.define("uc-video", UCVideo);
+if (!customElements.get('uc-video')) {
+  customElements.define('uc-video', UCVideo);
 }
