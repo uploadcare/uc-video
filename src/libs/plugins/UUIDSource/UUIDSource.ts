@@ -1,15 +1,21 @@
 import videojs from 'video.js';
-import { createSrcVideoAdaptive } from '../../shared/url/createSrcVideoAdaptive';
+import type { VideoPlayerWithPlugins } from '../../configuration';
 import { SOURCES_MIME_TYPES } from '../../shared/settings';
+import { createSrcVideoAdaptive } from '../../shared/url/createSrcVideoAdaptive';
 
 const Plugin = videojs.getPlugin('plugin');
 
-export class UUIDSource extends Plugin {
-  protected player;
-  protected uuid;
-  protected cdnCname;
+type Player = VideoPlayerWithPlugins & {
+  uuid: (value: string) => void;
+};
 
-  constructor(player, options: { uuid: string; cdnCname: string }) {
+//@ts-ignore
+export class UUIDSource extends Plugin {
+  private player: Player;
+  private uuid: string;
+  private cdnCname: string;
+
+  constructor(player: Player, options: { uuid: string; cdnCname: string }) {
     super(player, options);
 
     this.uuid = options.uuid;

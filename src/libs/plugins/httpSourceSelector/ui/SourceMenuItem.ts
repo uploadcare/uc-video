@@ -1,3 +1,4 @@
+//@ts-nocheck
 import videojs from 'video.js';
 
 const MenuItem = videojs.getComponent('MenuItem');

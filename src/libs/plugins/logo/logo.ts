@@ -1,5 +1,6 @@
 import videojs from 'video.js';
 import './logo.css';
+import type { VideoPlayerWithPlugins } from '../../configuration';
 import { metricaAnalytics } from '../../shared/analytics';
 
 const defaults = {
@@ -8,13 +9,19 @@ const defaults = {
 
 const Plugin = videojs.getPlugin('plugin');
 
-export class Logo extends Plugin {
-  protected player;
-  protected logoEl;
-  protected state;
-  protected options_;
+type Player = VideoPlayerWithPlugins & {
+  showLogo: (value: boolean) => void;
+  controlBar: any;
+};
 
-  constructor(player, options = {}) {
+//@ts-ignore
+export class Logo extends Plugin {
+  private player: Player;
+  private logoEl;
+  private state;
+  private options_;
+
+  constructor(player: Player, options = {}) {
     super(player, options);
     this.player = player;
 

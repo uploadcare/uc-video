@@ -1,5 +1,6 @@
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
+
 import { version } from '../../package.json';
 
 import baseStyles from './base.css?inline';
@@ -11,9 +12,10 @@ import {
   initialConfiguration,
   plainConfigKeys,
   toKebabCase,
+  type VideoPlayerWithPlugins,
 } from './configuration';
 import plugins from './plugins';
-import type { VideoPlayer } from './shared/schema/player';
+import { VIDEO_PLAYER_EVENTS } from './shared/settings';
 import { normalizeConfigValue } from './shared/utils/normalizeConfigValue';
 
 for (const [name, plugin] of Object.entries(plugins)) {
@@ -22,15 +24,15 @@ for (const [name, plugin] of Object.entries(plugins)) {
 
 class BaseVideoComponent extends HTMLElement {
   static observedAttributes = arrayAttrKeys;
-  private _videoEl?: HTMLVideoElement;
-  private _player;
+  protected _videoEl!: HTMLVideoElement | null;
+  protected _player!: VideoPlayerWithPlugins;
 
-  private _shadowRoot!: ShadowRoot;
-  private _options = Object.assign({}, initialConfiguration);
-  private _listeners = new Map();
+  protected _shadowRoot!: ShadowRoot;
+  protected _options = structuredClone(initialConfiguration);
+  protected _listeners = new Map();
 
-  private _initialized = false;
-  private _isReady = false;
+  protected _initialized = false;
+  protected _isReady = false;
 
   constructor() {
     super();
@@ -45,14 +47,18 @@ class BaseVideoComponent extends HTMLElement {
     for (const key of allKeysConfiguration) {
       const initialValue = anyThis._options[key];
 
-      if (initialValue !== initialConfiguration[key]) {
-        this._setValue(key, initialValue);
+      if (
+        initialValue !==
+        initialConfiguration[key as keyof typeof initialConfiguration]
+      ) {
+        this._setValue(key as keyof typeof initialConfiguration, initialValue);
       }
 
       if (!Object.hasOwn(this, key)) {
         Object.defineProperty(this, key, {
           get: () => this._getValue(key),
-          set: (value) => this._setValue(key, value),
+          set: (value) =>
+            this._setValue(key as keyof typeof initialConfiguration, value),
         });
       }
     }
@@ -88,8 +94,9 @@ class BaseVideoComponent extends HTMLElement {
     this._isReady = false;
     this._initialized = false;
 
-    this._player = null!;
-    this._videoEl = null!;
+    //@ts-ignore
+    this._player = null;
+    this._videoEl = null;
     this._shadowRoot.innerHTML = '';
   }
 
@@ -146,8 +153,10 @@ class BaseVideoComponent extends HTMLElement {
   _flushValueToState(key: keyof typeof initialConfiguration, value: unknown) {
     if (this._options[key] !== value) {
       if (typeof value === 'undefined' || value === null) {
+        //@ts-ignore
         this._options[key] = initialConfiguration[key];
       } else {
+        //@ts-ignore
         this._options[key] = value;
       }
     }
@@ -157,18 +166,21 @@ class BaseVideoComponent extends HTMLElement {
     const normalizedValue = normalizeConfigValue(key, value);
     if (this._options[key] === normalizedValue) return;
 
+    //@ts-ignore
     this._options[key] = normalizedValue;
 
     this._flushValueToAttribute(key, normalizedValue);
     this._flushValueToState(key, normalizedValue);
 
+    //@ts-ignore
     if (this._player?.[key]) {
+      //@ts-ignore
       this._player?.[key](normalizedValue);
     }
   }
 
   _getValue(key: string) {
-    return this._options[key];
+    return this._options[key as keyof typeof initialConfiguration];
   }
 
   _createVideoElement() {
@@ -186,12 +198,14 @@ class BaseVideoComponent extends HTMLElement {
     this._player = videojs(this._videoEl, this._options, () => {
       this._isReady = true;
 
-      this.dispatchEvent(new CustomEvent('ready', { detail: this._player }));
-    });
+      // Trigger ready event to fire all queued ready callbacks
+      // this._player.trigger('ready');
+    }) as VideoPlayerWithPlugins;
+
     this._initialized = true;
   }
 
-  get player(): VideoPlayer {
+  get player() {
     if (!this._player) {
       throw new Error('Video player is not initialized.');
     }
@@ -199,9 +213,7 @@ class BaseVideoComponent extends HTMLElement {
   }
 
   get isReady(): boolean {
-    return (
-      this._isReady && this._initialized && this._player?.readyState() >= 1
-    );
+    return this._isReady && this._initialized && this._player.readyState() >= 1;
   }
 
   ready(callback?: () => void): Promise<void> | this {
@@ -209,7 +221,7 @@ class BaseVideoComponent extends HTMLElement {
       if (this.isReady) {
         callback();
       } else {
-        this.player.ready(callback);
+        this.on(VIDEO_PLAYER_EVENTS.READY, callback);
       }
       return this;
     }
@@ -218,9 +230,9 @@ class BaseVideoComponent extends HTMLElement {
       if (this.isReady) {
         resolve();
       } else {
-        this.player.ready(() => {
+        this.on(VIDEO_PLAYER_EVENTS.READY, () => {
           this._isReady = true;
-          void resolve();
+          resolve();
         });
       }
     });

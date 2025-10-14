@@ -1,3 +1,4 @@
+//@ts-nocheck
 /**
  *
  * Fork https://github.com/chrisboustead/videojs-hls-quality-selector
@@ -5,6 +6,7 @@
  */
 
 import videojs from 'video.js';
+import type { VideoPlayerWithPlugins } from '../../configuration.js';
 import SourceMenuButton from './ui/SourceMenuButton.js';
 import SourceMenuItem from './ui/SourceMenuItem.js';
 
@@ -14,10 +16,10 @@ const Plugin = videojs.getPlugin('plugin');
 
 export class HttpSourceSelector extends Plugin {
   private _qualityButton;
-  private player;
-  private options;
+  private player: VideoPlayerWithPlugins;
+  private options: unknown;
 
-  constructor(player, options) {
+  constructor(player: VideoPlayerWithPlugins, options = {}) {
     super(player);
 
     this.options = videojs.obj.merge(defaults, options);

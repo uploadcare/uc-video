@@ -1,4 +1,6 @@
-type VideoAttributes = {
+import type Player from 'video.js/dist/types/player';
+
+export type VideoAttributes = {
   autoplay: boolean | 'muted' | 'play' | 'any';
   controls: boolean;
 
@@ -17,14 +19,14 @@ type VideoAttributes = {
   playsinline: boolean;
 };
 
-type UploadcareVideoOptions = {
+export type UploadcareVideoOptions = {
   uuid: string | null;
   cdnCname: string | null;
   showLogo: boolean;
   posterOffset: string;
 };
 
-type VideojsOptions = {
+export type VideojsOptions = {
   aspectRatio?: string | null;
   audioOnlyMode: boolean;
   audioPosterMode: boolean;
@@ -166,15 +168,13 @@ export const videojsOptions = {
     enabled: false,
     horizontalSeek: false,
   },
-  html5: undefined,
+  html5: DEFAULT_HLS_OPTIONS.html5,
 } satisfies VideojsOptions;
 
 export const initialConfiguration = Object.freeze({
   ...uploadcareConfiguration,
   ...defaultVideoAttributes,
   ...videojsOptions,
-
-  ...DEFAULT_HLS_OPTIONS,
 });
 
 export const allKeysConfiguration = Object.keys(initialConfiguration);
@@ -188,14 +188,18 @@ export const complexConfigKeys = [
   'techOrder',
   'spatialNavigation',
   'html5',
+  'children',
+  'userActions',
+  'languages',
+  'plugins',
+  'skipButtons',
 ];
 
 const isComplexKey = (key: string) => complexConfigKeys.includes(key);
 
-export const plainConfigKeys =
-  /** @type {(keyof import('../../types').ConfigPlainType)[]} */ allKeysConfiguration.filter(
-    (key) => !isComplexKey(key),
-  );
+export const plainConfigKeys = allKeysConfiguration.filter(
+  (key) => !isComplexKey(key),
+);
 
 export const toKebabCase = (str: string) =>
   str
@@ -216,3 +220,14 @@ export const arrayAttrKeys = new Set([
   ...Object.keys(attrKeyMapping),
   ...Object.values(attrKeyMapping),
 ]);
+
+export type VideoPlayerWithPlugins = Player & {
+  LogoInstance: (options: { active: boolean }) => void;
+  generatePoster: (options: {
+    videoEl: HTMLVideoElement | null;
+    posterOffset: UploadcareVideoOptions['posterOffset'];
+    crossOrigin: VideoAttributes['crossorigin'];
+  }) => void;
+  httpSourceSelector: () => void;
+  UUIDSourceInstance: (options: { uuid: string; cdnCname: string }) => void;
+};

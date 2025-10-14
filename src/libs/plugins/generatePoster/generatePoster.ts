@@ -1,7 +1,8 @@
 import videojs from 'video.js';
-import type Player from 'video.js/dist/types/player';
+
 import { VIDEO_PLAYER_EVENTS } from '../../shared/settings';
 import './poster.css';
+import type { VideoPlayerWithPlugins } from '../../configuration';
 import { timeToSeconds } from '../../shared/utils/timeToSeconds';
 
 const INIT_TIME = 0;
@@ -12,9 +13,13 @@ const defaultOptions = {
 
 const Plugin = videojs.getPlugin('plugin');
 
-export class GeneratePoster extends Plugin {
-  protected player: Player;
+type Player = VideoPlayerWithPlugins & {
+  posterOffset: () => void;
+};
 
+//@ts-ignore
+export class GeneratePoster extends Plugin {
+  private player: Player;
   private _videoEl: HTMLVideoElement | null = null;
   private _posterOffset: string | number | undefined;
 
