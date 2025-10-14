@@ -12,6 +12,7 @@ import {
 } from "./configuration";
 import plugins from "./plugins";
 import type { VideoPlayer } from "./shared/schema/player";
+import { normalizeConfigValue } from "./shared/utils/normalizeConfigValue";
 
 for (const [name, plugin] of Object.entries(plugins)) {
   videojs.registerPlugin(name, plugin);
@@ -19,23 +20,21 @@ for (const [name, plugin] of Object.entries(plugins)) {
 
 class BaseVideoComponent extends HTMLElement {
   static observedAttributes = arrayAttrKeys;
-  protected _videoEl?: HTMLVideoElement;
-  protected _player;
+  private _videoEl?: HTMLVideoElement;
+  private _player;
 
-  protected _shadowRoot!: ShadowRoot;
+  private _shadowRoot!: ShadowRoot;
+  private _options = Object.assign({}, initialConfiguration);
+  private _listeners = new Map();
 
-  protected _options = Object.assign({}, initialConfiguration);
-
-  protected _listeners = new Map();
-
-  protected _initialized = false;
-  protected _isReady = false;
-  protected _videojsFontFaceInjected = false;
+  private _initialized = false;
+  private _isReady = false;
+  private _videojsFontFaceInjected = false;
 
   constructor() {
     super();
 
-    // this._shadowRoot = this.attachShadow({ mode: "open" });
+    this._shadowRoot = this.attachShadow({ mode: "open" });
   }
 
   connectedCallback() {
@@ -61,14 +60,13 @@ class BaseVideoComponent extends HTMLElement {
       handlers.forEach((cb: () => void) => this._player.on(event, cb));
     }
 
-    this.render();
-    // this.loadDependencies()
-    //   .then(() => {
-    //     this.render();
-    //   })
-    //   .catch((err) => {
-    //     console.error("Failed to load dependencies:", err);
-    //   });
+    this.loadDependencies()
+      .then(() => {
+        this.render();
+      })
+      .catch((err) => {
+        console.error("Failed to load dependencies:", err);
+      });
   }
 
   disconnectedCallback() {
@@ -85,12 +83,12 @@ class BaseVideoComponent extends HTMLElement {
   destroy() {
     this._listeners.clear();
     this._player?.dispose();
-    this._player = null!;
     this._isReady = false;
     this._initialized = false;
+
+    this._player = null!;
     this._videoEl = null!;
-    this.innerHTML = "";
-    // this._shadowRoot.innerHTML = "";
+    this._shadowRoot.innerHTML = "";
   }
 
   render() {
@@ -168,47 +166,9 @@ class BaseVideoComponent extends HTMLElement {
     }
   }
 
-  _normalizeConfigValue(
-    key: keyof typeof initialConfiguration,
-    value: unknown
-  ) {
-    if (typeof value === "undefined" || value === null) {
-      return undefined;
-    }
-
-    try {
-      if (typeof initialConfiguration[key] === "boolean") {
-        if (typeof value === "undefined" || value === null) return false;
-        if (typeof value === "boolean") return value;
-        if (value === "true") return true;
-        if (value === "") return true;
-        if (value === "false") return false;
-      } else if (typeof initialConfiguration[key] === "number") {
-        if (typeof value === "string") {
-          const parsedValue = parseFloat(value);
-          if (!isNaN(parsedValue)) {
-            return parsedValue;
-          }
-        }
-      } else if (typeof initialConfiguration[key] === "string") {
-        if (typeof value === "string") {
-          return value;
-        }
-      } else if (typeof initialConfiguration[key] === "object") {
-        if (typeof value === "object") {
-          return value;
-        }
-      }
-      return value;
-    } catch (error) {
-      console.error(`Error normalizing config value for key ${key}:`, error);
-      return initialConfiguration[key];
-    }
-  }
-
   _setValue(key: keyof typeof initialConfiguration, value: unknown) {
     const anyThis = this;
-    const normalizedValue = this._normalizeConfigValue(key, value);
+    const normalizedValue = normalizeConfigValue(key, value);
     if (anyThis._options[key] === normalizedValue) return;
 
     anyThis._options[key] = normalizedValue;
@@ -222,16 +182,14 @@ class BaseVideoComponent extends HTMLElement {
   }
 
   _getValue(key: string) {
-    const anyThis = this;
-    return anyThis._options[key];
+    return this._options[key];
   }
 
   _createVideoElement() {
     const videoEl = document.createElement("video");
     videoEl.classList.add("video-js");
     this._videoEl = videoEl;
-    this.appendChild(videoEl);
-    // this._shadowRoot.appendChild(videoEl);
+    this._shadowRoot.appendChild(videoEl);
   }
 
   _initVideoJS() {

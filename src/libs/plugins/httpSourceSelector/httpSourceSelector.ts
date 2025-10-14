@@ -13,9 +13,9 @@ const defaults = {};
 const Plugin = videojs.getPlugin("plugin");
 
 export class HttpSourceSelector extends Plugin {
-  protected _qualityButton: SourceMenuButton;
-  protected player;
-  protected options;
+  private _qualityButton;
+  private player;
+  private options;
 
   constructor(player, options) {
     super(player);
@@ -77,7 +77,7 @@ export class HttpSourceSelector extends Plugin {
     const player = this.player;
     const qualityList = player.qualityLevels();
     const levels = qualityList.levels_ || [];
-    const levelItems = [];
+    const levelItems: SourceMenuItem[] = [];
 
     for (let i = 0; i < levels.length; ++i) {
       const { width, height } = levels[i];
