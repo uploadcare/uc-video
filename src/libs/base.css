@@ -1,7 +1,7 @@
 :where(:host) {
   display: block;
   width: 100%;
-  height: 480px;
+  height: 360px;
 }
 
 :where(:host .video-js) {

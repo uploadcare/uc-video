@@ -1,6 +1,8 @@
 import videojs from 'video.js';
 import 'video.js/dist/video-js.css';
-import baseStyles from './base.css?url';
+import { version } from '../../package.json';
+
+import baseStyles from './base.css?inline';
 
 import {
   allKeysConfiguration,
@@ -29,7 +31,6 @@ class BaseVideoComponent extends HTMLElement {
 
   private _initialized = false;
   private _isReady = false;
-  private _videojsFontFaceInjected = false;
 
   constructor() {
     super();
@@ -48,7 +49,7 @@ class BaseVideoComponent extends HTMLElement {
         this._setValue(key, initialValue);
       }
 
-      if (!this.hasOwnProperty(key)) {
+      if (!Object.hasOwn(this, key)) {
         Object.defineProperty(this, key, {
           get: () => this._getValue(key),
           set: (value) => this._setValue(key, value),
@@ -56,13 +57,14 @@ class BaseVideoComponent extends HTMLElement {
       }
     }
 
-    for (const [event, handlers] of this._listeners) {
-      handlers.forEach((cb: () => void) => this._player.on(event, cb));
-    }
-
     this.loadDependencies()
       .then(() => {
         this.render();
+      })
+      .then(() => {
+        for (const [event, handlers] of this._listeners) {
+          handlers.forEach((cb: () => void) => this._player.on(event, cb));
+        }
       })
       .catch((err) => {
         console.error('Failed to load dependencies:', err);
@@ -98,10 +100,15 @@ class BaseVideoComponent extends HTMLElement {
     }
   }
 
-  loadDependencies(): Promise<void[]> {
+  _loadBlobStyle() {
+    const style = document.createElement('style');
+    style.textContent = baseStyles;
+    this._shadowRoot.appendChild(style);
+  }
+
+  loadDependencies(): Promise<unknown[]> {
     const styleURLs = [
-      'https://cdn.jsdelivr.net/npm/@uploadcare/uc-video@latest/dist/uc-video.min.css',
-      baseStyles,
+      `https://cdn.jsdelivr.net/npm/@uploadcare/uc-video@${version}/dist/uc-video.min.css`,
     ];
     const promises = styleURLs.filter(Boolean).map(
       (url) =>
@@ -115,29 +122,9 @@ class BaseVideoComponent extends HTMLElement {
         }),
     );
 
-    this._injectGlobalFonts();
+    this._loadBlobStyle();
 
     return Promise.all(promises);
-  }
-
-  _injectGlobalFonts() {
-    const FONT_FACE = `
-    @font-face {
-      font-family: 'VideoJS';
-      src: url('https://vjs.zencdn.net/8.10.0/font/VideoJS.woff') format('woff'),
-           url('https://vjs.zencdn.net/8.10.0/font/VideoJS.ttf') format('truetype');
-      font-weight: normal;
-      font-style: normal;
-    }
-  `;
-
-    if (!this._videojsFontFaceInjected) {
-      const globalFont = document.createElement('style');
-      globalFont.textContent = FONT_FACE;
-      document.head.appendChild(globalFont);
-      this._videojsFontFaceInjected = true;
-    }
-    return Promise.resolve();
   }
 
   _flushValueToAttribute(
@@ -167,11 +154,10 @@ class BaseVideoComponent extends HTMLElement {
   }
 
   _setValue(key: keyof typeof initialConfiguration, value: unknown) {
-    const anyThis = this;
     const normalizedValue = normalizeConfigValue(key, value);
-    if (anyThis._options[key] === normalizedValue) return;
+    if (this._options[key] === normalizedValue) return;
 
-    anyThis._options[key] = normalizedValue;
+    this._options[key] = normalizedValue;
 
     this._flushValueToAttribute(key, normalizedValue);
     this._flushValueToState(key, normalizedValue);
