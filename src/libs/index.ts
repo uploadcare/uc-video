@@ -117,7 +117,7 @@ class BaseVideoComponent extends HTMLElement {
     const styleURLs = [
       `https://cdn.jsdelivr.net/npm/@uploadcare/uc-video@${version}/dist/uc-video.min.css`,
     ];
-    const promises = styleURLs.filter(Boolean).map(
+    const promises = styleURLs.map(
       (url) =>
         new Promise<void>((resolve, reject) => {
           const link = document.createElement('link');
@@ -177,6 +177,10 @@ class BaseVideoComponent extends HTMLElement {
       //@ts-ignore
       this._player?.[key](normalizedValue);
     }
+
+    if ((key === 'width' || key === 'height') && this._player?.styleEl_) {
+      this._shadowRoot.appendChild(this._player.styleEl_);
+    }
   }
 
   _getValue(key: string) {
@@ -198,8 +202,7 @@ class BaseVideoComponent extends HTMLElement {
     this._player = videojs(this._videoEl, this._options, () => {
       this._isReady = true;
 
-      // Trigger ready event to fire all queued ready callbacks
-      // this._player.trigger('ready');
+      this._shadowRoot.appendChild(this._player.styleEl_);
     }) as VideoPlayerWithPlugins;
 
     this._initialized = true;
