@@ -1,36 +1,32 @@
+//@ts-nocheck
 import videojs from 'video.js';
-import type Player from 'video.js/dist/types/player';
-import type { TOptions } from '../../../shared/settings';
 
 const MenuItem = videojs.getComponent('MenuItem');
 const Component = videojs.getComponent('Component');
 
 class SourceMenuItem extends MenuItem {
-  constructor(player: Player, options: TOptions) {
-    options.selectable = true;
-    options.multiSelectable = false;
+  protected item;
+  protected qualityButton;
+  protected plugin;
 
-    super(player, options);
+  constructor(player, item, qualityButton, plugin) {
+    super(player, {
+      label: item.label,
+      selectable: true,
+      selected: item.selected || false,
+    });
+    this.item = item;
+    this.qualityButton = qualityButton;
+    this.plugin = plugin;
   }
 
   handleClick() {
-    const selected = this.options_;
-
-    // @ts-ignore
-    super.handleClick();
-
-    const levels = [...this.player_.qualityLevels().levels_];
-
-    for (const [index, level] of levels.entries()) {
-      level.enabled =
-        selected.index === levels.length || selected.index === index;
+    for (let i = 0; i < this.qualityButton.items.length; ++i) {
+      this.qualityButton.items[i].selected(false);
     }
-  }
 
-  update() {
-    const selectedIndex = this.player_.qualityLevels().selectedIndex;
-    // @ts-ignore
-    this.selected(this.options_.index === selectedIndex);
+    this.plugin.setQuality(this.item.value);
+    this.selected(true);
   }
 }
 // @ts-ignore

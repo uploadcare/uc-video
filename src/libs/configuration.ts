@@ -1,4 +1,6 @@
-type VideoAttributes = {
+import type Player from 'video.js/dist/types/player';
+
+export type VideoAttributes = {
   autoplay: boolean | 'muted' | 'play' | 'any';
   controls: boolean;
 
@@ -17,14 +19,14 @@ type VideoAttributes = {
   playsinline: boolean;
 };
 
-type UploadcareVideoOptions = {
+export type UploadcareVideoOptions = {
   uuid: string | null;
   cdnCname: string | null;
   showLogo: boolean;
   posterOffset: string;
 };
 
-type VideojsOptions = {
+export type VideojsOptions = {
   aspectRatio?: string | null;
   audioOnlyMode: boolean;
   audioPosterMode: boolean;
@@ -118,7 +120,7 @@ export const defaultVideoAttributes = {
 } satisfies VideoAttributes;
 
 export const uploadcareConfiguration = {
-  uuid: null,
+  uuid: '',
   cdnCname: DEFAULT_CDN_CNAME,
   showLogo: true,
   posterOffset: '',
@@ -166,22 +168,40 @@ export const videojsOptions = {
     enabled: false,
     horizontalSeek: false,
   },
-  html5: undefined,
+  html5: DEFAULT_HLS_OPTIONS.html5,
 } satisfies VideojsOptions;
 
-export const initConfiguration = {
+export const initialConfiguration = Object.freeze({
   ...uploadcareConfiguration,
   ...defaultVideoAttributes,
   ...videojsOptions,
+});
 
-  ...DEFAULT_HLS_OPTIONS,
-};
+export const allKeysConfiguration = Object.keys(initialConfiguration);
 
-export const allKeysConfiguration = Object.keys(initConfiguration);
+export const complexConfigKeys = [
+  'breakpoints',
+  'children',
+  'fullscreen',
+  'restoreEl',
+  'sources',
+  'techOrder',
+  'spatialNavigation',
+  'html5',
+  'children',
+  'userActions',
+  'languages',
+  'plugins',
+  'skipButtons',
+];
 
-export const keysAccessedOnlyThroughDOM = [];
+const isComplexKey = (key: string) => complexConfigKeys.includes(key);
 
-const toKebabCase = (str: string) =>
+export const plainConfigKeys = allKeysConfiguration.filter(
+  (key) => !isComplexKey(key),
+);
+
+export const toKebabCase = (str: string) =>
   str
     .match(/[A-Z]{2,}(?=[A-Z][a-z]+[0-9]*|\b)|[A-Z]?[a-z]+[0-9]*|[A-Z]|[0-9]+/g)
     ?.map((x: string) => x.toLowerCase())
@@ -200,3 +220,14 @@ export const arrayAttrKeys = new Set([
   ...Object.keys(attrKeyMapping),
   ...Object.values(attrKeyMapping),
 ]);
+
+export type VideoPlayerWithPlugins = Player & {
+  LogoInstance: (options: { active: boolean }) => void;
+  generatePoster: (options: {
+    videoEl: HTMLVideoElement | null;
+    posterOffset: UploadcareVideoOptions['posterOffset'];
+    crossOrigin: VideoAttributes['crossorigin'];
+  }) => void;
+  httpSourceSelector: () => void;
+  UUIDSourceInstance: (options: { uuid: string; cdnCname: string }) => void;
+};

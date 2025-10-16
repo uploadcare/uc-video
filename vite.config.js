@@ -7,8 +7,34 @@ import dts from "vite-plugin-dts";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
-  test: {},
-  plugins: [dts()],
+  test: {
+    coverage: {
+      provider: "v8",
+
+      reporter: ["text", "html"],
+      reportsDirectory: "./coverage",
+      all: true,
+      exclude: ["**/node_modules/**", "**/dist/**"],
+    },
+    projects: [
+      {
+        resolve: {
+          alias: {
+            "@": __dirname,
+          },
+        },
+        test: {
+          include: ["./**/*.e2e.test.ts", "./**/*.e2e.test.tsx"],
+          browser: {
+            provider: "playwright",
+            enabled: true,
+            instances: [{ browser: "chromium" }],
+          },
+        },
+      },
+    ],
+  },
+  plugins: [dts({ insertTypesEntry: true })],
   build: {
     lib: {
       entry: {
@@ -20,6 +46,12 @@ export default defineConfig({
     rollupOptions: {
       treeshake: "smallest",
       external: [],
+    },
+
+    resolve: {
+      alias: {
+        "@": resolve(__dirname),
+      },
     },
   },
 });

@@ -1,102 +1,57 @@
+//@ts-nocheck
 import videojs from 'video.js';
-import type Player from 'video.js/dist/types/player.js';
-import type { TOptions } from '../../../shared/settings.js';
-import SourceMenuItem from './SourceMenuItem.js';
 
 const MenuButton = videojs.getComponent('MenuButton');
+const Menu = videojs.getComponent('Menu');
+const Component = videojs.getComponent('Component');
 
-class SourceMenuButton extends MenuButton {
-  constructor(player: Player, options: TOptions & { default: 'high' | 'low' }) {
-    // @ts-ignore
-    super(player, options);
-    const qualityLevels = this.player_.qualityLevels();
-
-    if (options && options.default) {
-      if (options.default === 'low') {
-        for (const [index, qualityLevel] of qualityLevels.entries()) {
-          qualityLevel.enabled = index === 0;
-        }
-      } else if (options.default === 'high') {
-        for (let index = 0; index < qualityLevels.length; index++) {
-          qualityLevels[index].enabled = index === qualityLevels.length - 1;
-        }
-      }
-    }
-
-    this.player_
-      .qualityLevels()
-      .on(
-        ['change', 'addqualitylevel', 'removequalitylevel'],
-        this.update.bind(this),
-      );
+const toTitleCase = (string: string) => {
+  if (typeof string !== 'string') {
+    return string;
   }
 
-  createEl() {
-    return videojs.dom.createEl('div', {
-      className:
-        'vjs-http-source-selector vjs-menu-button vjs-menu-button-popup vjs-control vjs-button custom-class-safari',
+  return string.charAt(0).toUpperCase() + string.slice(1);
+};
+
+class SourceMenuButton extends MenuButton {
+  constructor(player) {
+    super(player, {
+      title: player.localize('Quality'),
+      name: 'QualityButton',
     });
   }
 
-  buildCSSClass() {
-    return MenuButton.prototype.buildCSSClass.call(this) + 'vjs-icon-cog';
-  }
-
-  update() {
-    // @ts-ignore
-    return MenuButton.prototype.update.call(this);
-  }
-
   createItems() {
-    const menuItems = [];
-    const levels = this.player_.qualityLevels();
+    return [];
+  }
 
-    const labels = [] as unknown[];
+  createMenu() {
+    const menu = new Menu(this.player_, { menuButton: this });
 
-    for (let index = levels.length - 1; index >= 0; index--) {
-      const selected = index === levels.selectedIndex;
+    this.hideThreshold_ = 0;
 
-      // Display height if height metadata is provided with the stream, else use bitrate
-      let label = `${index}`;
-      let sortValue = index;
-      const level = levels[index];
+    if (this.options_.title) {
+      const titleEl = videojs.dom.createEl('li', {
+        className: 'vjs-menu-title',
+        innerHTML: toTitleCase(this.options_.title),
+        tabIndex: -1,
+      });
+      const titleComponent = new Component(this.player_, { el: titleEl });
 
-      if (level.height) {
-        label = `${level.height}p`;
-        sortValue = Number.parseInt(level.height, 10);
-      } else if (level.bitrate) {
-        label = `${Math.floor(level.bitrate / 1e3)} kbps`;
-        sortValue = Number.parseInt(level.bitrate, 10);
-      }
+      this.hideThreshold_ += 1;
 
-      // Skip duplicate labels
-      if (labels.includes(label)) {
-        // eslint-disable-next-line no-continue
-        continue;
-      }
-      labels.push(label);
-
-      menuItems.push(
-        new SourceMenuItem(this.player_, { label, index, selected, sortValue }),
-      );
+      menu.addItem(titleComponent);
     }
 
-    // If there are multiple quality levels, offer an 'auto' option
-    if (levels.length > 1) {
-      menuItems.push(
-        new SourceMenuItem(this.player_, {
-          label: 'Auto',
-          index: levels.length,
-          selected: false,
-          sortValue: 999999,
-        }),
-      );
+    this.items = this.createItems().reverse();
+
+    if (this.items) {
+      for (let i = 0; i < this.items.length; i++) {
+        menu.addItem(this.items[i]);
+      }
     }
 
-    // Sort menu items by their label name with Auto always first
-    menuItems.sort((a, b) => b.options_.sortValue - a.options_.sortValue);
-
-    return menuItems;
+    return menu;
   }
 }
 

@@ -1,8 +1,8 @@
 import videojs from 'video.js';
-import type Player from 'video.js/dist/types/player';
+
 import { VIDEO_PLAYER_EVENTS } from '../../shared/settings';
-import { BasePlugin } from '../BasePlugin';
 import './poster.css';
+import type { VideoPlayerWithPlugins } from '../../configuration';
 import { timeToSeconds } from '../../shared/utils/timeToSeconds';
 
 const INIT_TIME = 0;
@@ -10,9 +10,18 @@ const INIT_TIME = 0;
 const defaultOptions = {
   posterOffset: INIT_TIME,
 };
-export class GeneratePoster extends BasePlugin {
-  _videoEl: HTMLVideoElement | null = null;
-  _posterOffset: string | number | undefined;
+
+const Plugin = videojs.getPlugin('plugin');
+
+type Player = VideoPlayerWithPlugins & {
+  posterOffset: () => void;
+};
+
+//@ts-ignore
+export class GeneratePoster extends Plugin {
+  private player: Player;
+  private _videoEl: HTMLVideoElement | null = null;
+  private _posterOffset: string | number | undefined;
 
   constructor(
     player: Player,
@@ -24,6 +33,8 @@ export class GeneratePoster extends BasePlugin {
   ) {
     super(player, options);
 
+    this.player = player;
+
     this._videoEl = options.videoEl as HTMLVideoElement;
     this._posterOffset = options.posterOffset
       ? timeToSeconds(options.posterOffset as string)
@@ -33,28 +44,30 @@ export class GeneratePoster extends BasePlugin {
       this._videoEl.crossOrigin = options.crossOrigin;
     }
 
-    this._player.on(VIDEO_PLAYER_EVENTS.READY, () => {
+    this.player.posterOffset = () => this._checkAndSetPoster();
+
+    this.player.on(VIDEO_PLAYER_EVENTS.READY, () => {
       this._checkAndSetPoster();
     });
   }
 
   _checkAndSetPoster() {
-    const existingPoster = this._player.poster();
+    const existingPoster = this.player.poster();
 
     if (!existingPoster) {
-      this._player.on(VIDEO_PLAYER_EVENTS.LOADED_METADATA, () => {
-        this._player.currentTime(this._posterOffset);
-        this._player.on(VIDEO_PLAYER_EVENTS.SEEKED, () => {
+      this.player.on(VIDEO_PLAYER_EVENTS.LOADED_METADATA, () => {
+        this.player.currentTime(this._posterOffset);
+        this.player.on(VIDEO_PLAYER_EVENTS.SEEKED, () => {
           this._captureFrameAndSetPoster();
 
-          this._player.off(VIDEO_PLAYER_EVENTS.SEEKED);
+          this.player.off(VIDEO_PLAYER_EVENTS.SEEKED);
         });
       });
     }
   }
 
   async _captureFrameAndSetPoster() {
-    const duration = this._player.duration();
+    const duration = this.player.duration();
 
     // @ts-ignore
     if (this._posterOffset > duration) {
@@ -64,7 +77,7 @@ export class GeneratePoster extends BasePlugin {
     }
     try {
       const frameURL = await this._captureFrameAtTime();
-      this._player.poster(frameURL as string); // Set the captured frame as the poster
+      this.player.poster(frameURL as string); // Set the captured frame as the poster
     } catch (error) {
       console.error('Error setting poster:', error);
     }
@@ -96,7 +109,7 @@ export class GeneratePoster extends BasePlugin {
         // @ts-ignore
         reject('Failed to capture frame: ' + error.message);
       } finally {
-        this._player.currentTime(INIT_TIME);
+        this.player.currentTime(INIT_TIME);
       }
     });
   }

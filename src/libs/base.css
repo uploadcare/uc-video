@@ -1,3 +1,8 @@
-:where(uc-video) {
+:where(:host) {
   display: block;
+}
+
+:where(:host .video-js) {
+  width: 100%;
+  height: 100%;
 }
