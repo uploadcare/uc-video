@@ -105,37 +105,52 @@ class BaseVideoComponent extends HTMLElement {
     }
   }
 
-  _loadBlobStyle(textContent: string) {
-    const style = document.createElement('style');
-    style.textContent = textContent;
-    this._shadowRoot.appendChild(style);
+  _loadBlobStyle(textContent: string): Promise<void> {
+    return new Promise((resolve) => {
+      const style = document.createElement('style');
+      style.textContent = textContent;
+
+      style.onload = () => resolve();
+      style.onerror = () => resolve();
+
+      this._shadowRoot.appendChild(style);
+    });
   }
 
-  async _loadFontFaceInHead() {
+  async _loadFontFaceInHead(): Promise<void> {
     if (document.querySelector('style[data-videojs-font]')) {
-      return;
+      return Promise.resolve();
     }
 
-    const style = document.createElement('style');
-    style.setAttribute('data-videojs-font', 'true');
-    style.textContent = `
-      @font-face {
-      font-family: 'VideoJS';
-      src: url(${(await import('./font/VideoJS.woff?url')).default}) format('woff');
-      font-weight: normal;
-      font-style: normal;
-      }
-    `;
+    const fontUrl = (await import('./font/VideoJS.woff?url')).default;
 
-    document.head.appendChild(style);
+    return new Promise((resolve) => {
+      const style = document.createElement('style');
+      style.setAttribute('data-videojs-font', 'true');
+      style.textContent = `
+        @font-face {
+        font-family: 'VideoJS';
+        src: url(${fontUrl}) format('woff');
+        font-weight: normal;
+        font-style: normal;
+        }
+      `;
+
+      style.onload = () => resolve();
+      style.onerror = () => resolve();
+
+      document.head.appendChild(style);
+    });
   }
 
-  loadDependencies(): Promise<void> {
-    this._loadBlobStyle(videojsStyles);
-    this._loadBlobStyle(baseStyles);
-    this._loadFontFaceInHead();
+  loadDependencies(): Promise<unknown[]> {
+    const promises = Promise.all([
+      this._loadBlobStyle(videojsStyles),
+      this._loadBlobStyle(baseStyles),
+      this._loadFontFaceInHead(),
+    ]);
 
-    return Promise.resolve();
+    return Promise.resolve(promises);
   }
 
   _flushValueToAttribute(
