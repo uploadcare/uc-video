@@ -1,5 +1,4 @@
 import videojs from 'video.js';
-import './logo.css';
 import type { VideoPlayerWithPlugins } from '../../configuration';
 import { metricaAnalytics } from '../../shared/analytics';
 

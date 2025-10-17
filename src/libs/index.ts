@@ -1,8 +1,6 @@
 import videojs from 'video.js';
-import 'video.js/dist/video-js.css';
 
-import { version } from '../../package.json';
-
+import videojsStyles from 'video.js/dist/video-js.css?inline';
 import baseStyles from './base.css?inline';
 
 import {
@@ -107,31 +105,37 @@ class BaseVideoComponent extends HTMLElement {
     }
   }
 
-  _loadBlobStyle() {
+  _loadBlobStyle(textContent: string) {
     const style = document.createElement('style');
-    style.textContent = baseStyles;
+    style.textContent = textContent;
     this._shadowRoot.appendChild(style);
   }
 
-  loadDependencies(): Promise<unknown[]> {
-    const styleURLs = [
-      `https://cdn.jsdelivr.net/npm/@uploadcare/uc-video@${version}/dist/uc-video.min.css`,
-    ];
-    const promises = styleURLs.map(
-      (url) =>
-        new Promise<void>((resolve, reject) => {
-          const link = document.createElement('link');
-          link.rel = 'stylesheet';
-          link.href = url;
-          link.onload = () => resolve();
-          link.onerror = (e) => reject(e);
-          this._shadowRoot.appendChild(link);
-        }),
-    );
+  async _loadFontFaceInHead() {
+    if (document.querySelector('style[data-videojs-font]')) {
+      return;
+    }
 
-    this._loadBlobStyle();
+    const style = document.createElement('style');
+    style.setAttribute('data-videojs-font', 'true');
+    style.textContent = `
+      @font-face {
+      font-family: 'VideoJS';
+      src: url(${(await import('./font/VideoJS.woff?url')).default}) format('woff');
+      font-weight: normal;
+      font-style: normal;
+      }
+    `;
 
-    return Promise.all(promises);
+    document.head.appendChild(style);
+  }
+
+  loadDependencies(): Promise<void> {
+    this._loadBlobStyle(videojsStyles);
+    this._loadBlobStyle(baseStyles);
+    this._loadFontFaceInHead();
+
+    return Promise.resolve();
   }
 
   _flushValueToAttribute(

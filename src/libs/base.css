@@ -1,3 +1,5 @@
+@import url("./plugins/logo/logo.css");
+
 :where(:host) {
   display: block;
 }
