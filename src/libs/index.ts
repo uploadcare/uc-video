@@ -1,8 +1,6 @@
 import videojs from 'video.js';
-import 'video.js/dist/video-js.css';
 
-import { version } from '../../package.json';
-
+import videojsStyles from 'video.js/dist/video-js.css?inline';
 import baseStyles from './base.css?inline';
 
 import {
@@ -107,31 +105,52 @@ class BaseVideoComponent extends HTMLElement {
     }
   }
 
-  _loadBlobStyle() {
-    const style = document.createElement('style');
-    style.textContent = baseStyles;
-    this._shadowRoot.appendChild(style);
+  _loadBlobStyle(textContent: string): Promise<void> {
+    return new Promise((resolve) => {
+      const style = document.createElement('style');
+      style.textContent = textContent;
+
+      style.onload = () => resolve();
+      style.onerror = () => resolve();
+
+      this._shadowRoot.appendChild(style);
+    });
+  }
+
+  async _loadFontFaceInHead(): Promise<void> {
+    if (document.querySelector('style[data-videojs-font]')) {
+      return Promise.resolve();
+    }
+
+    const fontUrl = (await import('./font/VideoJS.woff?url')).default;
+
+    return new Promise((resolve) => {
+      const style = document.createElement('style');
+      style.setAttribute('data-videojs-font', 'true');
+      style.textContent = `
+        @font-face {
+        font-family: 'VideoJS';
+        src: url(${fontUrl}) format('woff');
+        font-weight: normal;
+        font-style: normal;
+        }
+      `;
+
+      style.onload = () => resolve();
+      style.onerror = () => resolve();
+
+      document.head.appendChild(style);
+    });
   }
 
   loadDependencies(): Promise<unknown[]> {
-    const styleURLs = [
-      `https://cdn.jsdelivr.net/npm/@uploadcare/uc-video@${version}/dist/uc-video.min.css`,
-    ];
-    const promises = styleURLs.map(
-      (url) =>
-        new Promise<void>((resolve, reject) => {
-          const link = document.createElement('link');
-          link.rel = 'stylesheet';
-          link.href = url;
-          link.onload = () => resolve();
-          link.onerror = (e) => reject(e);
-          this._shadowRoot.appendChild(link);
-        }),
-    );
+    const promises = Promise.all([
+      this._loadBlobStyle(videojsStyles),
+      this._loadBlobStyle(baseStyles),
+      this._loadFontFaceInHead(),
+    ]);
 
-    this._loadBlobStyle();
-
-    return Promise.all(promises);
+    return Promise.resolve(promises);
   }
 
   _flushValueToAttribute(
