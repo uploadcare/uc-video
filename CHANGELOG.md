@@ -3,8 +3,8 @@
 
 ### Features
 
-* added import styles and fonts ([#45](https://github.com/uploadcare/uc-video/issues/45)) ([dae03f0](https://github.com/uploadcare/uc-video/commit/dae03f088febc1e5cf826137e8a8c652a326f981))
-* added shadow dom ([#42](https://github.com/uploadcare/uc-video/issues/42)) ([b225263](https://github.com/uploadcare/uc-video/commit/b22526391a66ebbe8f1fd81e03eca58cdf4e5a1e))
+* added isolated styles and fonts ([#45](https://github.com/uploadcare/uc-video/issues/45)) ([dae03f0](https://github.com/uploadcare/uc-video/commit/dae03f088febc1e5cf826137e8a8c652a326f981))
+* added shadow DOM implementation  ([#42](https://github.com/uploadcare/uc-video/issues/42)) ([b225263](https://github.com/uploadcare/uc-video/commit/b22526391a66ebbe8f1fd81e03eca58cdf4e5a1e))
 
 
 
