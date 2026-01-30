@@ -61,13 +61,8 @@ class BaseVideoComponent extends HTMLElement {
       }
     }
 
-    // Render synchronously - player is immediately available
     this.render();
 
-    // Attach queued event listeners immediately after player initialization
-    this._attachQueuedListeners();
-
-    // Load fonts in background (non-blocking)
     this.loadDependencies().catch((err) => {
       console.error('Failed to load dependencies:', err);
     });
@@ -149,7 +144,6 @@ class BaseVideoComponent extends HTMLElement {
   }
 
   loadDependencies(): Promise<unknown[]> {
-    // Only load fonts asynchronously, styles are already loaded synchronously
     const promises = Promise.all([this._loadFontFaceInHead()]);
 
     return Promise.resolve(promises);
@@ -227,6 +221,8 @@ class BaseVideoComponent extends HTMLElement {
     }) as VideoPlayerWithPlugins;
 
     this._initialized = true;
+
+    this._attachQueuedListeners();
   }
 
   _attachQueuedListeners() {
