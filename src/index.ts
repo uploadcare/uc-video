@@ -61,18 +61,11 @@ class BaseVideoComponent extends HTMLElement {
       }
     }
 
-    this.loadDependencies()
-      .then(() => {
-        this.render();
-      })
-      .then(() => {
-        for (const [event, handlers] of this._listeners) {
-          handlers.forEach((cb: () => void) => this._player.on(event, cb));
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to load dependencies:', err);
-      });
+    this.render();
+    this.loadDependencies();
+    for (const [event, handlers] of this._listeners) {
+      handlers.forEach((cb: () => void) => this._player.on(event, cb));
+    }
   }
 
   disconnectedCallback() {

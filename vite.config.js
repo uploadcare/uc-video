@@ -1,34 +1,34 @@
 /// <reference types="vitest/config" />
-import { dirname, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
-import { defineConfig } from "vite";
-import dts from "vite-plugin-dts";
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { defineConfig } from 'vite';
+import dts from 'vite-plugin-dts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig({
   test: {
     coverage: {
-      provider: "v8",
+      provider: 'v8',
 
-      reporter: ["text", "html"],
-      reportsDirectory: "./coverage",
+      reporter: ['text', 'html'],
+      reportsDirectory: './coverage',
       all: true,
-      exclude: ["**/node_modules/**", "**/dist/**"],
+      exclude: ['**/node_modules/**', '**/dist/**'],
     },
     projects: [
       {
         resolve: {
           alias: {
-            "@": __dirname,
+            '@': __dirname,
           },
         },
         test: {
-          include: ["./**/*.e2e.test.ts", "./**/*.e2e.test.tsx"],
+          include: ['./**/*.e2e.test.ts', './**/*.e2e.test.tsx'],
           browser: {
-            provider: "playwright",
+            provider: 'playwright',
             enabled: true,
-            instances: [{ browser: "chromium" }],
+            instances: [{ browser: 'chromium' }],
           },
         },
       },
@@ -38,19 +38,19 @@ export default defineConfig({
   build: {
     lib: {
       entry: {
-        index: resolve(__dirname, "src/libs/index.ts"),
+        index: resolve(__dirname, 'src/index.ts'),
       },
-      name: "uc-video",
-      fileName: "uc-video",
+      name: 'uc-video',
+      fileName: 'uc-video',
     },
     rollupOptions: {
-      treeshake: "smallest",
+      // treeshake: "smallest",
       external: [],
     },
 
     resolve: {
       alias: {
-        "@": resolve(__dirname),
+        '@': resolve(__dirname),
       },
     },
   },
