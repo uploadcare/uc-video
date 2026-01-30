@@ -61,11 +61,16 @@ class BaseVideoComponent extends HTMLElement {
       }
     }
 
+    // Render synchronously - player is immediately available
     this.render();
-    this.loadDependencies();
-    for (const [event, handlers] of this._listeners) {
-      handlers.forEach((cb: () => void) => this._player.on(event, cb));
-    }
+
+    // Attach queued event listeners immediately after player initialization
+    this._attachQueuedListeners();
+
+    // Load fonts in background (non-blocking)
+    this.loadDependencies().catch((err) => {
+      console.error('Failed to load dependencies:', err);
+    });
   }
 
   disconnectedCallback() {
@@ -94,8 +99,15 @@ class BaseVideoComponent extends HTMLElement {
   render() {
     if (!this._videoEl) {
       this._createVideoElement();
+      this._loadStylesSync();
       this._initVideoJS();
     }
+  }
+
+  _loadStylesSync() {
+    const style = document.createElement('style');
+    style.textContent = videojsStyles + '\n' + baseStyles;
+    this._shadowRoot.appendChild(style);
   }
 
   _loadBlobStyle(textContent: string): Promise<void> {
@@ -137,11 +149,8 @@ class BaseVideoComponent extends HTMLElement {
   }
 
   loadDependencies(): Promise<unknown[]> {
-    const promises = Promise.all([
-      this._loadBlobStyle(videojsStyles),
-      this._loadBlobStyle(baseStyles),
-      this._loadFontFaceInHead(),
-    ]);
+    // Only load fonts asynchronously, styles are already loaded synchronously
+    const promises = Promise.all([this._loadFontFaceInHead()]);
 
     return Promise.resolve(promises);
   }
@@ -220,10 +229,15 @@ class BaseVideoComponent extends HTMLElement {
     this._initialized = true;
   }
 
-  get player() {
-    if (!this._player) {
-      throw new Error('Video player is not initialized.');
+  _attachQueuedListeners() {
+    if (!this._initialized || !this._player) return;
+
+    for (const [event, handlers] of this._listeners) {
+      handlers.forEach((cb: () => void) => this._player.on(event, cb));
     }
+  }
+
+  get player() {
     return this._player;
   }
 
