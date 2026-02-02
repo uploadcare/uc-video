@@ -61,18 +61,11 @@ class BaseVideoComponent extends HTMLElement {
       }
     }
 
-    this.loadDependencies()
-      .then(() => {
-        this.render();
-      })
-      .then(() => {
-        for (const [event, handlers] of this._listeners) {
-          handlers.forEach((cb: () => void) => this._player.on(event, cb));
-        }
-      })
-      .catch((err) => {
-        console.error('Failed to load dependencies:', err);
-      });
+    this.render();
+
+    this.loadDependencies().catch((err) => {
+      console.error('Failed to load dependencies:', err);
+    });
   }
 
   disconnectedCallback() {
@@ -101,8 +94,15 @@ class BaseVideoComponent extends HTMLElement {
   render() {
     if (!this._videoEl) {
       this._createVideoElement();
+      this._loadStylesSync();
       this._initVideoJS();
     }
+  }
+
+  _loadStylesSync() {
+    const style = document.createElement('style');
+    style.textContent = videojsStyles + '\n' + baseStyles;
+    this._shadowRoot.appendChild(style);
   }
 
   _loadBlobStyle(textContent: string): Promise<void> {
@@ -144,11 +144,7 @@ class BaseVideoComponent extends HTMLElement {
   }
 
   loadDependencies(): Promise<unknown[]> {
-    const promises = Promise.all([
-      this._loadBlobStyle(videojsStyles),
-      this._loadBlobStyle(baseStyles),
-      this._loadFontFaceInHead(),
-    ]);
+    const promises = Promise.all([this._loadFontFaceInHead()]);
 
     return Promise.resolve(promises);
   }
@@ -225,12 +221,19 @@ class BaseVideoComponent extends HTMLElement {
     }) as VideoPlayerWithPlugins;
 
     this._initialized = true;
+
+    this._attachQueuedListeners();
+  }
+
+  _attachQueuedListeners() {
+    if (!this._initialized || !this._player) return;
+
+    for (const [event, handlers] of this._listeners) {
+      handlers.forEach((cb: () => void) => this._player.on(event, cb));
+    }
   }
 
   get player() {
-    if (!this._player) {
-      throw new Error('Video player is not initialized.');
-    }
     return this._player;
   }
 
