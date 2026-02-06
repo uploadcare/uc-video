@@ -1,3 +1,12 @@
+## [0.4.1](https://github.com/uploadcare/uc-video/compare/v0.4.0...v0.4.1) (2026-02-02)
+
+
+### Reverts
+
+* Revert "chore(soc-2): update dependencies and eliminate critical dependencies (#52)" (#53) ([ef19280](https://github.com/uploadcare/uc-video/commit/ef1928013a00fb5dc3ea93fab89513754cedeb5d)), closes [#52](https://github.com/uploadcare/uc-video/issues/52) [#53](https://github.com/uploadcare/uc-video/issues/53)
+
+
+
 # [0.4.0](https://github.com/uploadcare/uc-video/compare/v0.3.6...v0.4.0) (2025-10-29)
 
 
