@@ -1,3 +1,12 @@
+# [0.5.0](https://github.com/uploadcare/uc-video/compare/v0.4.2...v0.5.0) (2026-02-19)
+
+
+### Features
+
+* **core:** improved player display  ([#60](https://github.com/uploadcare/uc-video/issues/60)) ([9ab7e37](https://github.com/uploadcare/uc-video/commit/9ab7e372432af64a4d232da8f791fd38229b185b))
+
+
+
 ## [0.4.2](https://github.com/uploadcare/uc-video/compare/v0.4.1...v0.4.2) (2026-02-16)
 
 
