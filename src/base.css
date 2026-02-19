@@ -1,4 +1,5 @@
 @import url("./plugins/logo/logo.css");
+@import url("./plugins/generatePoster/poster.css");
 
 :where(:host) {
   display: block;

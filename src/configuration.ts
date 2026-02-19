@@ -43,6 +43,7 @@ export type VideojsOptions = {
   enableSmoothSeeking: boolean;
   experimentalSvgIcons: boolean;
   fluid: boolean;
+  fill: boolean;
 
   fullscreen: {
     options: {
@@ -136,6 +137,7 @@ export const videojsOptions = {
   enableSmoothSeeking: false,
   experimentalSvgIcons: false,
   fluid: false,
+  fill: false,
   id: '',
   inactivityTimeout: 0,
   language: '',
