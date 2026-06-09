@@ -3,7 +3,7 @@ import path from 'path';
 
 export default {
   buildCommand: () => 'npm run build',
-  publishCommand: ({ defaultCommand }) => `${defaultCommand} --access public`,
+  publishCommand: ({ tag }) => `npm stage publish --tag ${tag}`,
   versionUpdated: ({ version, dir }) => {
     function generateEnvFile(variables) {
       let template = fs

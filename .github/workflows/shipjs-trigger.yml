@@ -16,7 +16,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           registry-url: "https://registry.npmjs.org"
-          node-version: '20'
+          node-version: '24'
+      - name: Pin npm with staged publishing support
+        run: npm install -g npm@">=11.15.0"
       - run: npm ci
       - run: |
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
@@ -26,3 +28,19 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
           SLACK_INCOMING_HOOK: ${{ secrets.SLACK_INCOMING_HOOK }}
+      - name: Read package metadata
+        id: pkg
+        run: |
+          {
+            echo "name=$(node -p "require('./package.json').name")"
+            echo "version=$(node -p "require('./package.json').version")"
+          } >> "$GITHUB_OUTPUT"
+      - name: Notify Slack about staged release
+        uses: slackapi/slack-github-action@37ebaef184d7626c5f204ab8d3baff4262dd30f0 # v1.27.0
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+        with:
+          channel-id: ${{ secrets.SLACK_NPM_RELEASE_CHANNEL }}
+          slack-message: |
+            :package: *${{ steps.pkg.outputs.name }}@${{ steps.pkg.outputs.version }}* staged for review
+            Review & approve (2FA required): https://www.npmjs.com/package/${{ steps.pkg.outputs.name }}?activeTab=staged
