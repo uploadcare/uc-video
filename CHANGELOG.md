@@ -1,3 +1,7 @@
+## [0.5.2](https://github.com/uploadcare/uc-video/compare/v0.5.1...v0.5.2) (2026-03-26)
+
+
+
 ## [0.5.1](https://github.com/uploadcare/uc-video/compare/v0.4.2...v0.5.1) (2026-02-19)
 
 
