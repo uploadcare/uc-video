@@ -24,6 +24,12 @@ const remoteTracks = (el: Element) => {
 
 const labels = (el: Element) => remoteTracks(el).map((track) => track.label);
 
+// UUIDSource sets the uuid's HLS source on ready, which would replace a source set earlier.
+const setSource = async (el: Element, src: string) => {
+  await new Promise<void>((resolve) => el.player.ready(() => resolve()));
+  el.player.src({ src, type: 'video/webm' });
+};
+
 afterEach(() => {
   document.body.innerHTML = '';
 });
@@ -98,7 +104,7 @@ describe('subtitles', () => {
     el.player.addRemoteTextTrack({ src: enVtt, label: 'auto' }, false);
     expect(labels(el)).toEqual(['English', 'auto']);
 
-    el.player.src({ src: blankWebm, type: 'video/webm' });
+    await setSource(el, blankWebm);
 
     await expect.poll(() => labels(el)).toEqual(['English']);
   });
@@ -109,7 +115,7 @@ describe('subtitles', () => {
     );
     await expect.poll(() => labels(el)).toEqual(['English']);
 
-    el.player.src({ src: blankWebm, type: 'video/webm' });
+    await setSource(el, blankWebm);
     await new Promise((resolve) => el.player.one('loadeddata', resolve));
     el.player.currentTime(2.5);
 
