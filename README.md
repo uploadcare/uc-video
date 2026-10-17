@@ -117,7 +117,7 @@ video.tracks = [
 - Tracks aren't tied to the video: they stay when `uuid` changes, so update them together.
 - Subtitle files are loaded with `fetch()`, so files on another origin need CORS headers (`Access-Control-Allow-Origin`). Uploadcare CDN sends them. With `crossorigin="use-credentials"`, cookies are sent, and the server must reply with an explicit origin instead of `*`.
 - The subtitles container is exposed as a CSS part: `uc-video::part(subtitles)`. Viewers can also change the font, colors and background under "subtitles settings" in the menu.
-- On iPhone, fullscreen uses the system player, which doesn't show these subtitles. They show again when the viewer leaves fullscreen.
+- On iPhone, fullscreen uses the system player, which doesn't show these subtitles. They show again when the viewer leaves fullscreen. To keep them visible, add the `prefer-full-window` attribute: fullscreen then stretches the player over the browser window instead, with its own controls and subtitles. Safari's toolbars stay visible.
 
 ## Framework support
 
