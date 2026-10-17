@@ -70,6 +70,11 @@ class BaseVideoComponent extends HTMLElement {
   }
 
   destroy() {
+    // video.js doesn't leave full-window mode on dispose, so the page would stay scroll-locked.
+    if (this._player?.isFullWindow) {
+      this._player.exitFullWindow();
+    }
+
     this._listeners.clear();
     this._player?.dispose();
     this._isReady = false;
@@ -212,6 +217,14 @@ class BaseVideoComponent extends HTMLElement {
 
       this._shadowRoot.appendChild(this._player.styleEl_);
     }) as VideoPlayerWithPlugins;
+
+    // video.js marks full-window mode with a class on document.body, which styles inside the shadow root can't see.
+    this._player.on('enterFullWindow', () =>
+      this.setAttribute('full-window', ''),
+    );
+    this._player.on('exitFullWindow', () =>
+      this.removeAttribute('full-window'),
+    );
 
     this._initialized = true;
 

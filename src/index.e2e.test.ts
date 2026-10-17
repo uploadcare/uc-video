@@ -59,3 +59,54 @@ describe('properties', () => {
     ]);
   });
 });
+
+describe('full-window mode', () => {
+  const box = (el: globalThis.Element) => {
+    const { left, top, width, height } = el.getBoundingClientRect();
+    return { left, top, width, height };
+  };
+
+  const mount = () => {
+    const style = document.createElement('style');
+    style.textContent =
+      'uc-video { width: 320px; height: 180px; margin: 20px; max-width: 50%; }';
+    document.body.innerHTML = `<uc-video uuid="test" cdn-cname="${location.origin}"></uc-video>`;
+    document.body.prepend(style);
+    return document.querySelector('uc-video') as Element;
+  };
+
+  it('fills the viewport even when page styles size the element', () => {
+    const el = mount();
+    const player = el.shadowRoot?.querySelector('.video-js') as HTMLElement;
+    const viewport = {
+      left: 0,
+      top: 0,
+      width: window.innerWidth,
+      height: window.innerHeight,
+    };
+
+    const before = box(el);
+    el.player.enterFullWindow();
+
+    expect(el.hasAttribute('full-window')).toBe(true);
+    expect(box(el)).toEqual(viewport);
+    expect(box(player)).toEqual(viewport);
+
+    el.player.exitFullWindow();
+
+    expect(el.hasAttribute('full-window')).toBe(false);
+    expect(box(el)).toEqual(before);
+  });
+
+  it('releases the page when removed in full-window mode', () => {
+    const el = mount();
+
+    el.player.enterFullWindow();
+    expect(document.documentElement.style.overflow).toBe('hidden');
+
+    el.remove();
+
+    expect(document.documentElement.style.overflow).toBe('');
+    expect(document.body.classList.contains('vjs-full-window')).toBe(false);
+  });
+});
