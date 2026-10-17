@@ -41,24 +41,13 @@ class BaseVideoComponent extends HTMLElement {
 
   connectedCallback() {
     this.destroy();
-    const anyThis = this as any;
 
+    // A value assigned before the element was upgraded is an own property that shadows the prototype accessor.
     for (const key of allKeysConfiguration) {
-      const initialValue = anyThis._options[key];
-
-      if (
-        initialValue !==
-        initialConfiguration[key as keyof typeof initialConfiguration]
-      ) {
-        this._setValue(key as keyof typeof initialConfiguration, initialValue);
-      }
-
-      if (!Object.hasOwn(this, key)) {
-        Object.defineProperty(this, key, {
-          get: () => this._getValue(key),
-          set: (value) =>
-            this._setValue(key as keyof typeof initialConfiguration, value),
-        });
+      if (Object.hasOwn(this, key)) {
+        const value = this[key as keyof this];
+        delete this[key as keyof this];
+        this._setValue(key as keyof typeof initialConfiguration, value);
       }
     }
 
@@ -288,6 +277,20 @@ class BaseVideoComponent extends HTMLElement {
     }
     return this;
   }
+}
+
+// Defined on the prototype so `key in el` holds before connect; React and Vue check that to set a property instead of an attribute.
+for (const key of allKeysConfiguration) {
+  Object.defineProperty(BaseVideoComponent.prototype, key, {
+    configurable: true,
+    enumerable: true,
+    get(this: BaseVideoComponent) {
+      return this._getValue(key);
+    },
+    set(this: BaseVideoComponent, value: unknown) {
+      this._setValue(key as keyof typeof initialConfiguration, value);
+    },
+  });
 }
 
 export class VideoComponent extends BaseVideoComponent {
