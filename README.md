@@ -85,6 +85,21 @@ Uploadcare Video Player provides all the [options][video-js-options] from video.
 - **showLogo**: shows the logo, default is `true`
 - **tracks**: subtitle tracks, property only. See [Subtitles](#subtitles)
 
+## Sizing
+
+Size `<uc-video>` with CSS, as you would a `<video>`:
+
+```css
+uc-video {
+  width: 100%; /* the height follows the video's aspect ratio */
+}
+```
+
+- Set both `width` and `height` to fill a fixed box; the video is letterboxed inside it.
+- Set only `width`, and the height follows the video's aspect ratio. Setting only `height` doesn't work the other way around, so set the width too.
+- Without CSS, the player takes the size from the `width` and `height` attributes, or else the video's own size (300px wide until the video loads). CSS on the element overrides the attributes.
+- `fluid` and `fill` work as in video.js.
+
 ## Subtitles
 
 Add `<track>` elements inside `<uc-video>`, as you would with `<video>`:

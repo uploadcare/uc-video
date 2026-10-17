@@ -3,11 +3,16 @@
 
 :where(:host) {
   display: block;
+  position: relative;
 }
 
-:where(:host .video-js) {
-  width: 100%;
-  height: 100%;
+/* Beats the fixed px size video.js gives a non-fluid player, so CSS on uc-video sizes the player.
+   Pinned with inset rather than height: 100%, which Safari resolves a little taller than an aspect-ratio host. */
+:host .video-js:not(.vjs-fluid) {
+  position: absolute;
+  inset: 0;
+  width: auto;
+  height: auto;
 }
 
 /* Page styles on uc-video (size, margin) beat :host rules unless these are !important. */
@@ -20,4 +25,5 @@
   max-width: none !important;
   max-height: none !important;
   margin: 0 !important;
+  aspect-ratio: auto !important;
 }

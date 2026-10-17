@@ -27,6 +27,7 @@ class BaseVideoComponent extends HTMLElement {
   protected _player!: VideoPlayerWithPlugins;
 
   protected _shadowRoot!: ShadowRoot;
+  protected _defaultSizeStyleEl = document.createElement('style');
   protected _options = structuredClone(initialConfiguration);
   protected _listeners = new Map();
 
@@ -226,9 +227,40 @@ class BaseVideoComponent extends HTMLElement {
       this.removeAttribute('full-window'),
     );
 
+    // The player fills the host (see base.css), so the size video.js would give the player becomes the host's overridable default.
+    const player = this._player as unknown as { updateStyleEl_(): void };
+    const updateStyleEl = player.updateStyleEl_.bind(player);
+    player.updateStyleEl_ = () => {
+      updateStyleEl();
+      this._updateDefaultSize();
+    };
+    this._shadowRoot.appendChild(this._defaultSizeStyleEl);
+    this._updateDefaultSize();
+
     this._initialized = true;
 
     this._attachQueuedListeners();
+  }
+
+  // Same defaults video.js uses for a fixed-size player: width/height options, then the video's size, then 300px at 16:9.
+  _updateDefaultSize() {
+    const player = this._player;
+
+    if (player.fluid() || player.fill()) {
+      this._defaultSizeStyleEl.textContent = '';
+      return;
+    }
+
+    const ratio = player.videoWidth()
+      ? player.videoHeight() / player.videoWidth()
+      : 9 / 16;
+    const optionHeight = player.height() || 0;
+    const width =
+      player.width() ||
+      (optionHeight ? optionHeight / ratio : player.videoWidth() || 300);
+    const height = optionHeight || width * ratio;
+
+    this._defaultSizeStyleEl.textContent = `:where(:host) { width: ${width}px; aspect-ratio: ${width} / ${height}; }`;
   }
 
   _attachQueuedListeners() {

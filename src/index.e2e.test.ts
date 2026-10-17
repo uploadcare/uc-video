@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import type { SubtitleTrack } from './configuration';
 import { UCVideo } from './index';
+import blankWebm from './plugins/subtitles/fixtures/blank.webm?url';
 import enVtt from './plugins/subtitles/fixtures/en.vtt?url';
 
 type Element = UCVideo & {
@@ -108,5 +109,73 @@ describe('full-window mode', () => {
 
     expect(document.documentElement.style.overflow).toBe('');
     expect(document.body.classList.contains('vjs-full-window')).toBe(false);
+  });
+});
+
+describe('sizing', () => {
+  const size = (el: globalThis.Element) => {
+    const { width, height } = el.getBoundingClientRect();
+    return { width, height };
+  };
+
+  const mount = (pageCss: string, attrs = '') => {
+    const style = document.createElement('style');
+    style.textContent = pageCss;
+    document.body.innerHTML = `<div style="width: 600px"><uc-video uuid="test" cdn-cname="${location.origin}" ${attrs}></uc-video></div>`;
+    document.body.prepend(style);
+
+    const el = document.querySelector('uc-video') as Element;
+    const player = el.shadowRoot?.querySelector('.video-js') as HTMLElement;
+    return { el, player };
+  };
+
+  // blank.webm is 64x36.
+  const loadVideo = async (el: Element) => {
+    await new Promise<void>((resolve) => el.player.ready(() => resolve()));
+    el.player.src({ src: blankWebm, type: 'video/webm' });
+    await new Promise((resolve) => el.player.one('loadedmetadata', resolve));
+  };
+
+  it('fills the size page styles give the element', async () => {
+    const { el, player } = mount('uc-video { width: 320px; height: 200px; }');
+    await loadVideo(el);
+
+    expect(size(el)).toEqual({ width: 320, height: 200 });
+    expect(size(player)).toEqual({ width: 320, height: 200 });
+  });
+
+  it('takes the height from the aspect ratio when page styles set the width', async () => {
+    const { el, player } = mount('uc-video { width: 100%; }');
+    await loadVideo(el);
+
+    expect(size(player)).toEqual({ width: 600, height: 337.5 });
+  });
+
+  it('keeps the video size when nothing sizes the element', async () => {
+    const { el, player } = mount('');
+    expect(size(player)).toEqual({ width: 300, height: 168.75 });
+
+    await loadVideo(el);
+
+    expect(size(el)).toEqual({ width: 64, height: 36 });
+    expect(size(player)).toEqual({ width: 64, height: 36 });
+  });
+
+  it('uses width and height attributes unless page styles override them', () => {
+    const { player } = mount('', 'width="320" height="240"');
+    expect(size(player)).toEqual({ width: 320, height: 240 });
+
+    const styled = mount(
+      'uc-video { width: 160px; }',
+      'width="320" height="240"',
+    );
+    expect(size(styled.player)).toEqual({ width: 160, height: 120 });
+  });
+
+  it('leaves fluid mode to video.js', async () => {
+    const { el, player } = mount('', 'fluid');
+    await loadVideo(el);
+
+    expect(size(player)).toEqual({ width: 600, height: 337.5 });
   });
 });
