@@ -83,6 +83,57 @@ Uploadcare Video Player provides all the [options][video-js-options] from video.
 - **UUID**: file uuid from Uploadcare
 - **posterOffset**: to get a frame from the video for the poster. Example: `posterOffset="1:30"` is `90sec`
 - **showLogo**: shows the logo, default is `true`
+- **tracks**: subtitle tracks, property only. See [Subtitles](#subtitles)
+- **responsive**: hides controls that don't fit on small players, default is `true` (video.js defaults to `false`). Up to 425px wide the time display and volume slider are hidden, and up to 320px the progress bar too. Set `responsive="false"` to keep every control
+
+## Sizing
+
+Size `<uc-video>` with CSS, as you would a `<video>`:
+
+```css
+uc-video {
+  width: 100%; /* the height follows the video's aspect ratio */
+}
+```
+
+- Set both `width` and `height` to fill a fixed box; the video is letterboxed inside it.
+- Set only `width`, and the height follows the video's aspect ratio. Setting only `height` doesn't work the other way around, so set the width too.
+- Without CSS, the player takes the size from the `width` and `height` attributes, or else the video's own size (300px wide until the video loads). CSS on the element overrides the attributes.
+- `fluid` and `fill` work as in video.js.
+
+## Subtitles
+
+Add `<track>` elements inside `<uc-video>`, as you would with `<video>`:
+
+```html
+<uc-video uuid="UUID_FILE_FROM_UPLOADCARE">
+  <track
+    kind="subtitles"
+    src="https://ucarecdn.com/UUID_SUBTITLES_FILE/"
+    srclang="en"
+    label="English"
+    default
+  />
+  <track kind="subtitles" src="/subtitles/de.srt" srclang="de" label="Deutsch" />
+</uc-video>
+```
+
+Or set them from JavaScript with the `tracks` property:
+
+```js
+const video = document.querySelector('uc-video');
+
+video.tracks = [
+  { kind: 'subtitles', src: '/subtitles/en.vtt', srclang: 'en', label: 'English', default: true },
+];
+```
+
+- WebVTT and SRT are supported. The format is detected from the file contents, so URLs without an extension, like Uploadcare CDN URLs, work.
+- The menu lists `<track>` children first, then `tracks`. It updates when `<track>` children are added, removed or edited, or when a new array is assigned to `tracks`. The viewer's chosen language stays selected while it's still available.
+- Tracks aren't tied to the video: they stay when `uuid` changes, so update them together.
+- Subtitle files are loaded with `fetch()`, so files on another origin need CORS headers (`Access-Control-Allow-Origin`). Uploadcare CDN sends them. With `crossorigin="use-credentials"`, cookies are sent, and the server must reply with an explicit origin instead of `*`.
+- The subtitles container is exposed as a CSS part: `uc-video::part(subtitles)`. Viewers can also change the font, colors and background under "subtitles settings" in the menu.
+- On iPhone, fullscreen uses the system player, which doesn't show these subtitles. They show again when the viewer leaves fullscreen. To keep them visible, add the `prefer-full-window` attribute: fullscreen then stretches the player over the browser window instead, with its own controls and subtitles. Safari's toolbars stay visible.
 
 ## Framework support
 

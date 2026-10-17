@@ -25,6 +25,7 @@ export default defineConfig({
         },
         test: {
           include: ['./**/*.e2e.test.ts', './**/*.e2e.test.tsx'],
+          expect: { poll: { timeout: 5000 } },
           browser: {
             provider: 'playwright',
             enabled: true,
@@ -34,7 +35,12 @@ export default defineConfig({
       },
     ],
   },
-  plugins: [dts({ insertTypesEntry: true })],
+  plugins: [
+    dts({
+      insertTypesEntry: true,
+      exclude: ['node_modules/**', '**/*.test.ts'],
+    }),
+  ],
   build: {
     lib: {
       entry: {

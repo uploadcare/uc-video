@@ -9,6 +9,7 @@ import {
   attrKeyMapping,
   initialConfiguration,
   plainConfigKeys,
+  type SubtitleTrack,
   toKebabCase,
   type VideoPlayerWithPlugins,
 } from './configuration';
@@ -26,6 +27,7 @@ class BaseVideoComponent extends HTMLElement {
   protected _player!: VideoPlayerWithPlugins;
 
   protected _shadowRoot!: ShadowRoot;
+  protected _defaultSizeStyleEl = document.createElement('style');
   protected _options = structuredClone(initialConfiguration);
   protected _listeners = new Map();
 
@@ -40,24 +42,13 @@ class BaseVideoComponent extends HTMLElement {
 
   connectedCallback() {
     this.destroy();
-    const anyThis = this as any;
 
+    // A value assigned before the element was upgraded is an own property that shadows the prototype accessor.
     for (const key of allKeysConfiguration) {
-      const initialValue = anyThis._options[key];
-
-      if (
-        initialValue !==
-        initialConfiguration[key as keyof typeof initialConfiguration]
-      ) {
-        this._setValue(key as keyof typeof initialConfiguration, initialValue);
-      }
-
-      if (!Object.hasOwn(this, key)) {
-        Object.defineProperty(this, key, {
-          get: () => this._getValue(key),
-          set: (value) =>
-            this._setValue(key as keyof typeof initialConfiguration, value),
-        });
+      if (Object.hasOwn(this, key)) {
+        const value = this[key as keyof this];
+        delete this[key as keyof this];
+        this._setValue(key as keyof typeof initialConfiguration, value);
       }
     }
 
@@ -80,6 +71,11 @@ class BaseVideoComponent extends HTMLElement {
   }
 
   destroy() {
+    // video.js doesn't leave full-window mode on dispose, so the page would stay scroll-locked.
+    if (this._player?.isFullWindow) {
+      this._player.exitFullWindow();
+    }
+
     this._listeners.clear();
     this._player?.dispose();
     this._isReady = false;
@@ -214,15 +210,57 @@ class BaseVideoComponent extends HTMLElement {
       throw new Error('Video element already initialized.');
     }
 
-    this._player = videojs(this._videoEl, this._options, () => {
+    // The Subtitles plugin owns all text tracks. If video.js saw `tracks` it would add them itself, and they couldn't be replaced later.
+    const options = { ...this._options, tracks: [] };
+
+    this._player = videojs(this._videoEl, options, () => {
       this._isReady = true;
 
       this._shadowRoot.appendChild(this._player.styleEl_);
     }) as VideoPlayerWithPlugins;
 
+    // video.js marks full-window mode with a class on document.body, which styles inside the shadow root can't see.
+    this._player.on('enterFullWindow', () =>
+      this.setAttribute('full-window', ''),
+    );
+    this._player.on('exitFullWindow', () =>
+      this.removeAttribute('full-window'),
+    );
+
+    // The player fills the host (see base.css), so the size video.js would give the player becomes the host's overridable default.
+    const player = this._player as unknown as { updateStyleEl_(): void };
+    const updateStyleEl = player.updateStyleEl_.bind(player);
+    player.updateStyleEl_ = () => {
+      updateStyleEl();
+      this._updateDefaultSize();
+    };
+    this._shadowRoot.appendChild(this._defaultSizeStyleEl);
+    this._updateDefaultSize();
+
     this._initialized = true;
 
     this._attachQueuedListeners();
+  }
+
+  // Same defaults video.js uses for a fixed-size player: width/height options, then the video's size, then 300px at 16:9.
+  _updateDefaultSize() {
+    const player = this._player;
+
+    if (player.fluid() || player.fill()) {
+      this._defaultSizeStyleEl.textContent = '';
+      return;
+    }
+
+    const ratio = player.videoWidth()
+      ? player.videoHeight() / player.videoWidth()
+      : 9 / 16;
+    const optionHeight = player.height() || 0;
+    const width =
+      player.width() ||
+      (optionHeight ? optionHeight / ratio : player.videoWidth() || 300);
+    const height = optionHeight || width * ratio;
+
+    this._defaultSizeStyleEl.textContent = `:where(:host) { width: ${width}px; aspect-ratio: ${width} / ${height}; }`;
   }
 
   _attachQueuedListeners() {
@@ -286,7 +324,37 @@ class BaseVideoComponent extends HTMLElement {
   }
 }
 
+// Defined on the prototype so `key in el` holds before connect; React and Vue check that to set a property instead of an attribute.
+for (const key of allKeysConfiguration) {
+  Object.defineProperty(BaseVideoComponent.prototype, key, {
+    configurable: true,
+    enumerable: true,
+    get(this: BaseVideoComponent) {
+      return this._getValue(key);
+    },
+    set(this: BaseVideoComponent, value: unknown) {
+      this._setValue(key as keyof typeof initialConfiguration, value);
+    },
+  });
+}
+
 export class VideoComponent extends BaseVideoComponent {
+  protected _tracksObserver: MutationObserver | null = null;
+
+  destroy() {
+    this._tracksObserver?.disconnect();
+    this._tracksObserver = null;
+    super.destroy();
+  }
+
+  _setValue(key: keyof typeof initialConfiguration, value: unknown) {
+    super._setValue(key, value);
+
+    if (key === 'tracks') {
+      this._syncTracks();
+    }
+  }
+
   _initVideoJS() {
     super._initVideoJS();
     this._initPlugins();
@@ -297,6 +365,49 @@ export class VideoComponent extends BaseVideoComponent {
     this._initQualityHls();
     this._initGeneratePoster();
     this._initLogo();
+    this._initSubtitles();
+  }
+
+  _initSubtitles() {
+    this._player?.SubtitlesInstance({
+      crossOrigin: this._options?.crossorigin,
+    });
+
+    this._player
+      ?.getChild('textTrackDisplay')
+      ?.el()
+      .setAttribute('part', 'subtitles');
+
+    // <track> children stay in the light DOM, out of reach of the <video> inside the shadow root.
+    this._tracksObserver = new MutationObserver(() => this._syncTracks());
+    this._tracksObserver.observe(this, {
+      childList: true,
+      subtree: true,
+      attributeFilter: ['src', 'kind', 'srclang', 'label', 'default'],
+    });
+
+    this._syncTracks();
+  }
+
+  _syncTracks() {
+    const childTracks = Array.from(
+      this.querySelectorAll<HTMLTrackElement>(':scope > track'),
+      (el): SubtitleTrack => ({
+        src: el.src,
+        kind: el.kind as SubtitleTrack['kind'],
+        srclang: el.srclang,
+        label: el.label,
+        default: el.default,
+      }),
+    );
+
+    const tracks = Array.isArray(this._options.tracks)
+      ? this._options.tracks
+      : [];
+
+    this._player
+      ?.SubtitlesInstance()
+      .setTracks([...childTracks, ...tracks].filter((track) => track?.src));
   }
 
   _initQualityHls() {

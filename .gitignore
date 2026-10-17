@@ -28,3 +28,4 @@ dist-ssr
 
 **/*.d.ts
 **/*.d.ts.map
+__screenshots__

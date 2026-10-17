@@ -8,7 +8,21 @@
   </head>
   <body>
     <h1>Hello</h1>
-    <uc-video></uc-video>
-    <script type="module" src="/src/libs/index.ts"></script>
+    <uc-video uuid="YOUR_FILE_UUID">
+      <track
+        kind="subtitles"
+        src="/src/plugins/subtitles/fixtures/en.vtt"
+        srclang="en"
+        label="English"
+        default
+      />
+      <track
+        kind="subtitles"
+        src="/src/plugins/subtitles/fixtures/de.srt"
+        srclang="de"
+        label="Deutsch"
+      />
+    </uc-video>
+    <script type="module" src="/src/index.ts"></script>
   </body>
 </html>
