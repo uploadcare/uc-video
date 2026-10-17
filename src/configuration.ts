@@ -1,4 +1,5 @@
 import type Player from 'video.js/dist/types/player';
+import type { Subtitles } from './plugins/subtitles';
 
 export type VideoAttributes = {
   autoplay: boolean | 'muted' | 'play' | 'any';
@@ -19,11 +20,20 @@ export type VideoAttributes = {
   playsinline: boolean;
 };
 
+export type SubtitleTrack = {
+  src: string;
+  kind?: 'subtitles' | 'captions' | 'descriptions' | 'chapters' | 'metadata';
+  srclang?: string;
+  label?: string;
+  default?: boolean;
+};
+
 export type UploadcareVideoOptions = {
   uuid: string | null;
   cdnCname: string | null;
   showLogo: boolean;
   posterOffset: string;
+  tracks: SubtitleTrack[];
 };
 
 export type VideojsOptions = {
@@ -125,6 +135,7 @@ export const uploadcareConfiguration = {
   cdnCname: DEFAULT_CDN_CNAME,
   showLogo: true,
   posterOffset: '',
+  tracks: [] as SubtitleTrack[],
 } satisfies UploadcareVideoOptions;
 
 export const videojsOptions = {
@@ -195,6 +206,7 @@ export const complexConfigKeys = [
   'languages',
   'plugins',
   'skipButtons',
+  'tracks',
 ];
 
 const isComplexKey = (key: string) => complexConfigKeys.includes(key);
@@ -232,4 +244,7 @@ export type VideoPlayerWithPlugins = Player & {
   }) => void;
   httpSourceSelector: () => void;
   UUIDSourceInstance: (options: { uuid: string; cdnCname: string }) => void;
+  SubtitlesInstance: (options?: {
+    crossOrigin: VideoAttributes['crossorigin'];
+  }) => Subtitles;
 };

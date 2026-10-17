@@ -83,6 +83,42 @@ Uploadcare Video Player provides all the [options][video-js-options] from video.
 - **UUID**: file uuid from Uploadcare
 - **posterOffset**: to get a frame from the video for the poster. Example: `posterOffset="1:30"` is `90sec`
 - **showLogo**: shows the logo, default is `true`
+- **tracks**: subtitle tracks, property only. See [Subtitles](#subtitles)
+
+## Subtitles
+
+Add `<track>` elements inside `<uc-video>`, as you would with `<video>`:
+
+```html
+<uc-video uuid="UUID_FILE_FROM_UPLOADCARE">
+  <track
+    kind="subtitles"
+    src="https://ucarecdn.com/UUID_SUBTITLES_FILE/"
+    srclang="en"
+    label="English"
+    default
+  />
+  <track kind="subtitles" src="/subtitles/de.srt" srclang="de" label="Deutsch" />
+</uc-video>
+```
+
+Or set them from JavaScript with the `tracks` property:
+
+```js
+const video = document.querySelector('uc-video');
+
+video.tracks = [
+  { kind: 'subtitles', src: '/subtitles/en.vtt', srclang: 'en', label: 'English', default: true },
+];
+```
+
+- WebVTT and SRT are supported. The format is detected from the file contents, so URLs without an extension, like Uploadcare CDN URLs, work.
+- The menu lists `<track>` children first, then `tracks`. It updates when `<track>` children are added, removed or edited, or when a new array is assigned to `tracks`. The viewer's chosen language stays selected while it's still available.
+- Tracks aren't tied to the video: they stay when `uuid` changes, so update them together.
+- Set the `tracks` property after the element is connected to the document.
+- Subtitle files are loaded with `fetch()`, so files on another origin need CORS headers (`Access-Control-Allow-Origin`). Uploadcare CDN sends them. With `crossorigin="use-credentials"`, cookies are sent, and the server must reply with an explicit origin instead of `*`.
+- The subtitles container is exposed as a CSS part: `uc-video::part(subtitles)`. Viewers can also change the font, colors and background under "subtitles settings" in the menu.
+- On iPhone, fullscreen uses the system player, which doesn't show these subtitles. They show again when the viewer leaves fullscreen.
 
 ## Framework support
 

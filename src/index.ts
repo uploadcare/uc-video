@@ -9,6 +9,7 @@ import {
   attrKeyMapping,
   initialConfiguration,
   plainConfigKeys,
+  type SubtitleTrack,
   toKebabCase,
   type VideoPlayerWithPlugins,
 } from './configuration';
@@ -214,7 +215,10 @@ class BaseVideoComponent extends HTMLElement {
       throw new Error('Video element already initialized.');
     }
 
-    this._player = videojs(this._videoEl, this._options, () => {
+    // The Subtitles plugin owns all text tracks. If video.js saw `tracks` it would add them itself, and they couldn't be replaced later.
+    const options = { ...this._options, tracks: [] };
+
+    this._player = videojs(this._videoEl, options, () => {
       this._isReady = true;
 
       this._shadowRoot.appendChild(this._player.styleEl_);
@@ -287,6 +291,22 @@ class BaseVideoComponent extends HTMLElement {
 }
 
 export class VideoComponent extends BaseVideoComponent {
+  protected _tracksObserver: MutationObserver | null = null;
+
+  destroy() {
+    this._tracksObserver?.disconnect();
+    this._tracksObserver = null;
+    super.destroy();
+  }
+
+  _setValue(key: keyof typeof initialConfiguration, value: unknown) {
+    super._setValue(key, value);
+
+    if (key === 'tracks') {
+      this._syncTracks();
+    }
+  }
+
   _initVideoJS() {
     super._initVideoJS();
     this._initPlugins();
@@ -297,6 +317,49 @@ export class VideoComponent extends BaseVideoComponent {
     this._initQualityHls();
     this._initGeneratePoster();
     this._initLogo();
+    this._initSubtitles();
+  }
+
+  _initSubtitles() {
+    this._player?.SubtitlesInstance({
+      crossOrigin: this._options?.crossorigin,
+    });
+
+    this._player
+      ?.getChild('textTrackDisplay')
+      ?.el()
+      .setAttribute('part', 'subtitles');
+
+    // <track> children stay in the light DOM, out of reach of the <video> inside the shadow root.
+    this._tracksObserver = new MutationObserver(() => this._syncTracks());
+    this._tracksObserver.observe(this, {
+      childList: true,
+      subtree: true,
+      attributeFilter: ['src', 'kind', 'srclang', 'label', 'default'],
+    });
+
+    this._syncTracks();
+  }
+
+  _syncTracks() {
+    const childTracks = Array.from(
+      this.querySelectorAll<HTMLTrackElement>(':scope > track'),
+      (el): SubtitleTrack => ({
+        src: el.src,
+        kind: el.kind as SubtitleTrack['kind'],
+        srclang: el.srclang,
+        label: el.label,
+        default: el.default,
+      }),
+    );
+
+    const tracks = Array.isArray(this._options.tracks)
+      ? this._options.tracks
+      : [];
+
+    this._player
+      ?.SubtitlesInstance()
+      .setTracks([...childTracks, ...tracks].filter((track) => track?.src));
   }
 
   _initQualityHls() {
