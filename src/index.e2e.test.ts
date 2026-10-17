@@ -179,3 +179,52 @@ describe('sizing', () => {
     expect(size(player)).toEqual({ width: 600, height: 337.5 });
   });
 });
+
+describe('control bar', () => {
+  const mount = async (width: number, attrs = '') => {
+    document.body.innerHTML = `<uc-video style="width: ${width}px" uuid="test" cdn-cname="${location.origin}" ${attrs}><track src="${enVtt}" srclang="en" label="English"></uc-video>`;
+    const el = document.querySelector('uc-video') as Element;
+    // The uuid's HLS stream errors in Playwright's Chromium, and video.js hides the control bar on error.
+    await new Promise<void>((resolve) => el.player.ready(() => resolve()));
+    el.player.src({ src: blankWebm, type: 'video/webm' });
+    await new Promise((resolve) => el.player.one('loadedmetadata', resolve));
+    el.player.addClass('vjs-has-started');
+
+    const root = el.shadowRoot as ShadowRoot;
+    const bar = root.querySelector('.vjs-control-bar') as HTMLElement;
+    const visible = (selector: string) => {
+      const control = root.querySelector(selector);
+      return !!control && getComputedStyle(control).display !== 'none';
+    };
+
+    await expect.poll(() => visible('.vjs-subs-caps-button')).toBe(true);
+    return { el, bar, visible };
+  };
+
+  it('fits captions, quality and the logo at 320px', async () => {
+    const { bar, visible } = await mount(320);
+
+    expect(bar.scrollWidth).toBe(bar.clientWidth);
+    for (const control of [
+      '.vjs-subs-caps-button',
+      '.vjs-quality-selector',
+      '.vjs-fullscreen-control',
+      '.vjs-uc-logo',
+    ]) {
+      expect(visible(control), control).toBe(true);
+    }
+  });
+
+  it('keeps the progress bar above 320px', async () => {
+    const { bar, visible } = await mount(360);
+
+    expect(bar.scrollWidth).toBe(bar.clientWidth);
+    expect(visible('.vjs-progress-control')).toBe(true);
+  });
+
+  it('can turn responsive mode off', async () => {
+    const { el } = await mount(320, 'responsive="false"');
+
+    expect(el.player.responsive()).toBe(false);
+  });
+});

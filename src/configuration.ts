@@ -160,7 +160,7 @@ export const videojsOptions = {
   playbackRates: [],
   posterImage: true,
   preferFullWindow: false,
-  responsive: false,
+  responsive: true,
   restoreEl: false,
   suppressNotSupportedError: false,
   techCanOverridePoster: false,

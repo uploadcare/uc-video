@@ -84,6 +84,7 @@ Uploadcare Video Player provides all the [options][video-js-options] from video.
 - **posterOffset**: to get a frame from the video for the poster. Example: `posterOffset="1:30"` is `90sec`
 - **showLogo**: shows the logo, default is `true`
 - **tracks**: subtitle tracks, property only. See [Subtitles](#subtitles)
+- **responsive**: hides controls that don't fit on small players, default is `true` (video.js defaults to `false`). Up to 425px wide the time display and volume slider are hidden, and up to 320px the progress bar too. Set `responsive="false"` to keep every control
 
 ## Sizing
 
